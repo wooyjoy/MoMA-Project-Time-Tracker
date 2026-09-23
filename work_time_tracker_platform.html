@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TimeFlow - Work Time Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono-time {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.25; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-indicator {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header with Editable Title -->
+  <header class="bg-white/90 backdrop-blur border-b border-slate-200/80 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center space-x-3 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 shrink-0">
+          <i data-lucide="clock-4" class="w-5 h-5"></i>
+        </div>
+        <!-- Editable Workspace Title -->
+        <div class="flex items-center gap-2">
+          <div class="relative flex items-center">
+            <input 
+              id="workspaceTitleInput" 
+              type="text" 
+              value="TimeFlow"
+              maxlength="40"
+              title="클릭하여 이름 수정"
+              class="text-lg font-bold tracking-tight text-slate-900 bg-transparent border border-transparent hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:outline-none px-2 py-0.5 rounded-lg transition text-ellipsis"
+            />
+            <button 
+              id="editTitleBtn" 
+              title="타이틀 수정" 
+              class="text-slate-400 hover:text-slate-600 p-1 opacity-60 hover:opacity-100 transition ml-0.5"
+            >
+              <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full space-y-6">
+
+    <!-- Primary Action Controls -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+      <div>
+        <h1 class="text-base sm:text-lg font-bold text-slate-900">Work Sessions</h1>
+        <p class="text-xs text-slate-400">프로젝트별 작업 시간을 기록하고 관리하세요</p>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button id="openManualLogBtn" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl transition">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-slate-600"></i>
+          <span>Add Past Entry</span>
+        </button>
+        <button id="openNewSessionBtn" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl shadow-xs shadow-indigo-200 transition">
+          <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+          <span>Track Time</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 KPI Metric Cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Today's Tracked</p>
+          <h3 id="statTodayTime" class="text-2xl font-extrabold text-slate-900 mt-1 font-mono-time">0h 0m</h3>
+        </div>
+        <div class="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+          <i data-lucide="timer" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Timers</p>
+          <h3 id="statActiveCount" class="text-2xl font-extrabold text-slate-900 mt-1 font-mono-time">0</h3>
+        </div>
+        <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+          <i data-lucide="activity" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tracked Projects</p>
+          <h3 id="statProjectCount" class="text-2xl font-extrabold text-slate-900 mt-1 font-mono-time">0</h3>
+        </div>
+        <div class="p-3 bg-violet-50 rounded-xl text-violet-600">
+          <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">All-Time Work</p>
+          <h3 id="statAllTime" class="text-2xl font-extrabold text-slate-900 mt-1 font-mono-time">0h 0m</h3>
+        </div>
+        <div class="p-3 bg-amber-50 rounded-xl text-amber-600">
+          <i data-lucide="calendar-check" class="w-5 h-5"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- In-Progress Sessions -->
+    <section>
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-indicator"></span>
+          <h2 class="text-base font-bold text-slate-800">In-Progress Sessions</h2>
+        </div>
+        <span id="activeSessionsBadge" class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">0 Running</span>
+      </div>
+
+      <div id="activeContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Running timer cards -->
+      </div>
+
+      <div id="noActiveState" class="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
+        <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2.5">
+          <i data-lucide="stopwatch" class="w-5 h-5"></i>
+        </div>
+        <p class="text-slate-800 font-semibold text-sm">현재 진행 중인 타이머가 없습니다</p>
+        <p class="text-slate-400 text-xs mt-0.5 mb-3">기존 프로젝트에서 이어서 작업하거나 새 프로젝트를 시작하세요.</p>
+        <button id="quickStartBtn" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl transition">
+          <i data-lucide="play" class="w-3.5 h-3.5 fill-indigo-700"></i> Start Tracking
+        </button>
+      </div>
+    </section>
+
+    <!-- Tabs & Filter Bar -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2 p-1 bg-slate-200/70 rounded-xl w-fit">
+          <button id="tabProjects" class="px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-white text-indigo-600 shadow-xs">
+            <i data-lucide="folders" class="w-3.5 h-3.5"></i>
+            <span>Projects Overview</span>
+          </button>
+          <button id="tabLogs" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 text-slate-600 hover:text-slate-900">
+            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
+            <span>Chronological Logs</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input 
+              id="searchInput" 
+              type="text" 
+              placeholder="프로젝트 검색..." 
+              class="w-full text-xs pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition" 
+            />
+          </div>
+
+          <button id="exportCsvBtn" title="CSV 파일로 다운로드" class="px-3 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 1: Projects Overview -->
+      <div id="viewProjects" class="space-y-4">
+        <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Project cards -->
+        </div>
+
+        <div id="noProjectsState" class="bg-white rounded-2xl p-12 text-center border border-slate-200 hidden">
+          <i data-lucide="folder-search" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+          <h4 class="text-sm font-bold text-slate-800">등록된 프로젝트가 없습니다</h4>
+          <p class="text-xs text-slate-400 mt-1">상단의 "Track Time" 버튼을 눌러 첫 세션을 시작해보세요.</p>
+        </div>
+      </div>
+
+      <!-- Tab 2: Chronological Logs -->
+      <div id="viewLogs" class="hidden bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50/80 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+                <th class="py-3.5 px-5">Date</th>
+                <th class="py-3.5 px-5">Project Name</th>
+                <th class="py-3.5 px-5">Start Time</th>
+                <th class="py-3.5 px-5">Finish Time</th>
+                <th class="py-3.5 px-5">Duration (h & m)</th>
+                <th class="py-3.5 px-5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- Log rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="noLogsState" class="py-12 text-center text-slate-400 hidden">
+          <i data-lucide="clipboard-list" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+          <p class="text-sm font-semibold text-slate-700">기록된 작업 내역이 없습니다</p>
+          <p class="text-xs text-slate-400 mt-0.5">작업 세션이 완료되면 여기에 시간별로 정렬되어 표시됩니다.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Track Time -->
+  <div id="sessionModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-100 transform scale-95 transition-transform duration-200" id="sessionModalCard">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <i data-lucide="play" class="w-4 h-4 fill-indigo-600"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Track Working Time</h3>
+            <p class="text-xs text-slate-400">기존 프로젝트를 재개하거나 새 프로젝트를 시작하세요</p>
+          </div>
+        </div>
+        <button id="closeSessionModalBtn" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="sessionForm" class="space-y-4">
+        <div class="flex p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600">
+          <button type="button" id="modeExistingBtn" class="flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition">
+            Resume Existing Project
+          </button>
+          <button type="button" id="modeNewBtn" class="flex-1 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 transition">
+            + Brand New Project
+          </button>
+        </div>
+
+        <div id="existingProjectGroup" class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Select Project</label>
+          <div class="relative">
+            <select id="existingProjectSelect" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm appearance-none">
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <p id="noExistingNotice" class="text-xs text-amber-600 hidden">기존 프로젝트가 없습니다. "Brand New Project" 탭을 눌러 새로 만들어보세요.</p>
+        </div>
+
+        <div id="newProjectGroup" class="space-y-2 hidden">
+          <label for="newProjectInput" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">New Project Name</label>
+          <input 
+            type="text" 
+            id="newProjectInput" 
+            placeholder="예: 웹사이트 리뉴얼, 3분기 기획서 작성..." 
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm transition"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/60 space-y-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-500 font-medium">Session Date:</span>
+            <input 
+              type="date" 
+              id="newSessionDateInput" 
+              class="text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-500 font-medium">Starting Time:</span>
+            <div class="flex items-center gap-1.5">
+              <input 
+                type="time" 
+                id="newSessionStartTimeInput" 
+                class="text-xs font-medium text-indigo-700 bg-white border border-slate-200 rounded-lg px-2 py-1 font-mono-time focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <button 
+                type="button" 
+                id="setNowStartTimeBtn" 
+                title="현재 시간으로 맞춤"
+                class="text-[10px] px-1.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md font-semibold"
+              >
+                Now
+              </button>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 italic">시작 버튼을 늦게 눌렀다면 시작 시간을 이전 시간으로 조정할 수 있습니다.</p>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" id="cancelSessionModalBtn" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            취소
+          </button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs shadow-indigo-200 transition flex items-center gap-1.5">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+            <span>Start Tracking Now</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Completed Session -->
+  <div id="editLogModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-100 transform scale-95 transition-transform duration-200" id="editLogModalCard">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Edit Session Times</h3>
+            <p class="text-xs text-slate-400">시간을 변경하면 소요 시간(Duration)이 자동 계산됩니다</p>
+          </div>
+        </div>
+        <button id="closeEditLogModalBtn" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="editLogForm" class="space-y-4">
+        <input type="hidden" id="editLogId" />
+
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Project Name</label>
+          <input 
+            type="text" 
+            id="editLogProjectName" 
+            required 
+            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm font-medium"
+          />
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Session Date</label>
+          <input 
+            type="date" 
+            id="editLogDate" 
+            required 
+            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm font-medium"
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Start Time</label>
+            <input 
+              type="time" 
+              id="editLogStartTime" 
+              required 
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono-time focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Finish Time</label>
+            <input 
+              type="time" 
+              id="editLogEndTime" 
+              required 
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono-time focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"
+            />
+          </div>
+        </div>
+
+        <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 flex items-center justify-between text-xs">
+          <span class="text-indigo-900 font-medium">Calculated Duration:</span>
+          <span id="editLogCalculatedDuration" class="font-mono-time font-bold text-indigo-700 text-sm">--</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" id="cancelEditLogModalBtn" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            취소
+          </button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Active Timer Start Time -->
+  <div id="editActiveModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-slate-100 transform scale-95 transition-transform duration-200" id="editActiveModalCard">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">시작 시간 수정</h3>
+            <p id="editActiveProjectName" class="text-xs text-slate-500 font-medium truncate max-w-[200px]"></p>
+          </div>
+        </div>
+        <button id="closeEditActiveModalBtn" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="editActiveForm" class="space-y-4">
+        <input type="hidden" id="editActiveSessionId" />
+
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Date Started</label>
+          <input 
+            type="date" 
+            id="editActiveDateInput" 
+            required 
+            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          />
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Actual Start Time</label>
+          <input 
+            type="time" 
+            id="editActiveTimeInput" 
+            required 
+            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono-time text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          />
+          <p class="text-[11px] text-slate-400 mt-1">
+            새로 설정한 시작 시각을 기준으로 현재 진행 시간이 다시 계산됩니다.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" id="cancelEditActiveModalBtn" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            취소
+          </button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition">
+            수정 완료
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Manual Past Session -->
+  <div id="manualLogModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-100 transform scale-95 transition-transform duration-200" id="manualLogModalCard">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Add Past Work Session</h3>
+            <p class="text-xs text-slate-400">이전에 끝난 작업 시간을 직접 수기 입력합니다</p>
+          </div>
+        </div>
+        <button id="closeManualLogModalBtn" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="manualLogForm" class="space-y-4">
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Project Name</label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="manualProjectInput" 
+              list="projectDataList" 
+              placeholder="프로젝트 선택 또는 새 이름 입력..." 
+              required 
+              autocomplete="off"
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"
+            />
+            <datalist id="projectDataList">
+            </datalist>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Date Worked</label>
+          <input 
+            type="date" 
+            id="manualDateInput" 
+            required 
+            class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm font-medium"
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Start Time</label>
+            <input 
+              type="time" 
+              id="manualStartTimeInput" 
+              required 
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono-time focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Finish Time</label>
+            <input 
+              type="time" 
+              id="manualEndTimeInput" 
+              required 
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono-time focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"
+            />
+          </div>
+        </div>
+
+        <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 flex items-center justify-between text-xs">
+          <span class="text-indigo-900 font-medium">Calculated Duration:</span>
+          <span id="manualCalculatedDuration" class="font-mono-time font-bold text-indigo-700 text-sm">--</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" id="cancelManualLogModalBtn" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            취소
+          </button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition">
+            Save Log Entry
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 transition-all duration-200 pointer-events-none">
+    <div class="bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 border border-slate-800">
+      <i id="toastIcon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+      <span id="toastMsg">Session updated</span>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY_ACTIVE = 'timeflow_active_sessions_v2';
+    const STORAGE_KEY_LOGS = 'timeflow_completed_logs_v2';
+    const STORAGE_KEY_TITLE = 'timeflow_workspace_title';
+
+    let activeSessions = [];
+    let completedLogs = [];
+    let timerInterval = null;
+    let currentTab = 'projects';
+    let modalMode = 'existing';
+    let expandedProjects = new Set();
+
+    // DOM Elements - Workspace Title
+    const workspaceTitleInput = document.getElementById('workspaceTitleInput');
+    const editTitleBtn = document.getElementById('editTitleBtn');
+
+    // DOM Elements - Metrics
+    const statTodayTime = document.getElementById('statTodayTime');
+    const statActiveCount = document.getElementById('statActiveCount');
+    const statProjectCount = document.getElementById('statProjectCount');
+    const statAllTime = document.getElementById('statAllTime');
+
+    // DOM Elements - Active & Views
+    const activeContainer = document.getElementById('activeContainer');
+    const noActiveState = document.getElementById('noActiveState');
+    const activeSessionsBadge = document.getElementById('activeSessionsBadge');
+    const tabProjects = document.getElementById('tabProjects');
+    const tabLogs = document.getElementById('tabLogs');
+    const viewProjects = document.getElementById('viewProjects');
+    const viewLogs = document.getElementById('viewLogs');
+    const projectsGrid = document.getElementById('projectsGrid');
+    const noProjectsState = document.getElementById('noProjectsState');
+    const logsTableBody = document.getElementById('logsTableBody');
+    const noLogsState = document.getElementById('noLogsState');
+    const searchInput = document.getElementById('searchInput');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+
+    // DOM Elements - Start Modal
+    const openNewSessionBtn = document.getElementById('openNewSessionBtn');
+    const quickStartBtn = document.getElementById('quickStartBtn');
+    const sessionModal = document.getElementById('sessionModal');
+    const sessionModalCard = document.getElementById('sessionModalCard');
+    const closeSessionModalBtn = document.getElementById('closeSessionModalBtn');
+    const cancelSessionModalBtn = document.getElementById('cancelSessionModalBtn');
+    const sessionForm = document.getElementById('sessionForm');
+    const modeExistingBtn = document.getElementById('modeExistingBtn');
+    const modeNewBtn = document.getElementById('modeNewBtn');
+    const existingProjectGroup = document.getElementById('existingProjectGroup');
+    const newProjectGroup = document.getElementById('newProjectGroup');
+    const existingProjectSelect = document.getElementById('existingProjectSelect');
+    const newProjectInput = document.getElementById('newProjectInput');
+    const noExistingNotice = document.getElementById('noExistingNotice');
+    const newSessionDateInput = document.getElementById('newSessionDateInput');
+    const newSessionStartTimeInput = document.getElementById('newSessionStartTimeInput');
+    const setNowStartTimeBtn = document.getElementById('setNowStartTimeBtn');
+
+    // DOM Elements - Edit Modal
+    const editLogModal = document.getElementById('editLogModal');
+    const editLogModalCard = document.getElementById('editLogModalCard');
+    const closeEditLogModalBtn = document.getElementById('closeEditLogModalBtn');
+    const cancelEditLogModalBtn = document.getElementById('cancelEditLogModalBtn');
+    const editLogForm = document.getElementById('editLogForm');
+    const editLogId = document.getElementById('editLogId');
+    const editLogProjectName = document.getElementById('editLogProjectName');
+    const editLogDate = document.getElementById('editLogDate');
+    const editLogStartTime = document.getElementById('editLogStartTime');
+    const editLogEndTime = document.getElementById('editLogEndTime');
+    const editLogCalculatedDuration = document.getElementById('editLogCalculatedDuration');
+
+    // DOM Elements - Active Edit Modal
+    const editActiveModal = document.getElementById('editActiveModal');
+    const editActiveModalCard = document.getElementById('editActiveModalCard');
+    const closeEditActiveModalBtn = document.getElementById('closeEditActiveModalBtn');
+    const cancelEditActiveModalBtn = document.getElementById('cancelEditActiveModalBtn');
+    const editActiveForm = document.getElementById('editActiveForm');
+    const editActiveSessionId = document.getElementById('editActiveSessionId');
+    const editActiveProjectName = document.getElementById('editActiveProjectName');
+    const editActiveDateInput = document.getElementById('editActiveDateInput');
+    const editActiveTimeInput = document.getElementById('editActiveTimeInput');
+
+    // DOM Elements - Manual Modal
+    const openManualLogBtn = document.getElementById('openManualLogBtn');
+    const manualLogModal = document.getElementById('manualLogModal');
+    const manualLogModalCard = document.getElementById('manualLogModalCard');
+    const closeManualLogModalBtn = document.getElementById('closeManualLogModalBtn');
+    const cancelManualLogModalBtn = document.getElementById('cancelManualLogModalBtn');
+    const manualLogForm = document.getElementById('manualLogForm');
+    const manualProjectInput = document.getElementById('manualProjectInput');
+    const projectDataList = document.getElementById('projectDataList');
+    const manualDateInput = document.getElementById('manualDateInput');
+    const manualStartTimeInput = document.getElementById('manualStartTimeInput');
+    const manualEndTimeInput = document.getElementById('manualEndTimeInput');
+    const manualCalculatedDuration = document.getElementById('manualCalculatedDuration');
+
+    function formatTime(isoString) {
+      if (!isoString) return '--:--';
+      const d = new Date(isoString);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDate(isoString) {
+      if (!isoString) return '--';
+      const d = new Date(isoString);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function toInputDateFormat(isoString) {
+      const d = isoString ? new Date(isoString) : new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function toInputTimeFormat(isoString) {
+      const d = isoString ? new Date(isoString) : new Date();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${hh}:${min}`;
+    }
+
+    function combineDateAndTimeToIso(dateStr, timeStr) {
+      if (!dateStr || !timeStr) return new Date().toISOString();
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      const d = new Date(year, month - 1, day, hours, minutes, 0, 0);
+      return d.toISOString();
+    }
+
+    function computeDurationExact(startIso, endIso) {
+      const startMs = new Date(startIso).getTime();
+      const endMs = new Date(endIso).getTime();
+      let diffMs = endMs - startMs;
+      if (diffMs < 0) diffMs = 0;
+
+      const totalMinutes = Math.floor(diffMs / (1000 * 60));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      return {
+        hours,
+        minutes,
+        formatted: `${hours}h ${minutes}m`,
+        totalMinutes
+      };
+    }
+
+    function formatLiveElapsed(startIso) {
+      const startMs = new Date(startIso).getTime();
+      const diffMs = Math.max(0, Date.now() - startMs);
+
+      const totalSecs = Math.floor(diffMs / 1000);
+      const hrs = Math.floor(totalSecs / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+    }
+
+    function loadData() {
+      try {
+        const savedTitle = localStorage.getItem(STORAGE_KEY_TITLE);
+        if (savedTitle && savedTitle.trim()) {
+          workspaceTitleInput.value = savedTitle.trim();
+          document.title = `${savedTitle.trim()} - Work Time Tracker`;
+        }
+      } catch (e) {
+        console.error('Error loading title', e);
+      }
+
+      try {
+        const savedActive = localStorage.getItem(STORAGE_KEY_ACTIVE);
+        if (savedActive) activeSessions = JSON.parse(savedActive);
+      } catch (e) {
+        console.error('Error loading active sessions', e);
+        activeSessions = [];
+      }
+
+      try {
+        const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
+        if (savedLogs) {
+          completedLogs = JSON.parse(savedLogs);
+        } else {
+          completedLogs = [];
+          saveLogs();
+        }
+      } catch (e) {
+        console.error('Error loading logs', e);
+        completedLogs = [];
+      }
+    }
+
+    function saveActive() {
+      localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(activeSessions));
+    }
+
+    function saveLogs() {
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(completedLogs));
+    }
+
+    function saveWorkspaceTitle() {
+      const val = workspaceTitleInput.value.trim() || 'TimeFlow';
+      workspaceTitleInput.value = val;
+      localStorage.setItem(STORAGE_KEY_TITLE, val);
+      document.title = `${val} - Work Time Tracker`;
+    }
+
+    workspaceTitleInput.addEventListener('blur', saveWorkspaceTitle);
+    workspaceTitleInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') workspaceTitleInput.blur();
+    });
+    editTitleBtn.addEventListener('click', () => {
+      workspaceTitleInput.focus();
+      workspaceTitleInput.select();
+    });
+
+    function getDistinctProjects() {
+      const set = new Set();
+      activeSessions.forEach(s => {
+        if (s.projectName) set.add(s.projectName.trim());
+      });
+      completedLogs.forEach(l => {
+        if (l.projectName) set.add(l.projectName.trim());
+      });
+      return Array.from(set).sort();
+    }
+
+    function updateProjectDataLists() {
+      const distinct = getDistinctProjects();
+      projectDataList.innerHTML = '';
+      distinct.forEach(proj => {
+        const option = document.createElement('option');
+        option.value = proj;
+        projectDataList.appendChild(option);
+      });
+    }
+
+    function openModal(prefilledProject = null) {
+      sessionModal.classList.remove('opacity-0', 'pointer-events-none');
+      sessionModalCard.classList.remove('scale-95');
+      sessionModalCard.classList.add('scale-100');
+
+      const now = new Date();
+      newSessionDateInput.value = toInputDateFormat(now.toISOString());
+      newSessionStartTimeInput.value = toInputTimeFormat(now.toISOString());
+
+      const distinctProjects = getDistinctProjects();
+      existingProjectSelect.innerHTML = '';
+      if (distinctProjects.length > 0) {
+        distinctProjects.forEach(proj => {
+          const opt = document.createElement('option');
+          opt.value = proj;
+          opt.textContent = proj;
+          existingProjectSelect.appendChild(opt);
+        });
+        noExistingNotice.classList.add('hidden');
+        existingProjectSelect.disabled = false;
+      } else {
+        noExistingNotice.classList.remove('hidden');
+        existingProjectSelect.disabled = true;
+      }
+
+      if (prefilledProject) {
+        setModalMode('existing');
+        existingProjectSelect.value = prefilledProject;
+      } else if (distinctProjects.length === 0) {
+        setModalMode('new');
+      } else {
+        setModalMode('existing');
+      }
+
+      newProjectInput.value = '';
+    }
+
+    function closeModal() {
+      sessionModal.classList.add('opacity-0', 'pointer-events-none');
+      sessionModalCard.classList.remove('scale-100');
+      sessionModalCard.classList.add('scale-95');
+    }
+
+    function setModalMode(mode) {
+      modalMode = mode;
+      if (mode === 'existing') {
+        modeExistingBtn.classList.add('bg-white', 'text-indigo-600', 'shadow-xs');
+        modeExistingBtn.classList.remove('text-slate-500');
+        modeNewBtn.classList.remove('bg-white', 'text-indigo-600', 'shadow-xs');
+        modeNewBtn.classList.add('text-slate-500');
+        existingProjectGroup.classList.remove('hidden');
+        newProjectGroup.classList.add('hidden');
+      } else {
+        modeNewBtn.classList.add('bg-white', 'text-indigo-600', 'shadow-xs');
+        modeNewBtn.classList.remove('text-slate-500');
+        modeExistingBtn.classList.remove('bg-white', 'text-indigo-600', 'shadow-xs');
+        modeExistingBtn.classList.add('text-slate-500');
+        newProjectGroup.classList.remove('hidden');
+        existingProjectGroup.classList.add('hidden');
+        setTimeout(() => newProjectInput.focus(), 50);
+      }
+    }
+
+    setNowStartTimeBtn.addEventListener('click', () => {
+      const now = new Date();
+      newSessionDateInput.value = toInputDateFormat(now.toISOString());
+      newSessionStartTimeInput.value = toInputTimeFormat(now.toISOString());
+    });
+
+    modeExistingBtn.addEventListener('click', () => setModalMode('existing'));
+    modeNewBtn.addEventListener('click', () => setModalMode('new'));
+    openNewSessionBtn.addEventListener('click', () => openModal());
+    quickStartBtn.addEventListener('click', () => openModal());
+    closeSessionModalBtn.addEventListener('click', closeModal);
+    cancelSessionModalBtn.addEventListener('click', closeModal);
+    sessionModal.addEventListener('click', (e) => {
+      if (e.target === sessionModal) closeModal();
+    });
+
+    sessionForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let projectName = '';
+
+      if (modalMode === 'existing') {
+        projectName = existingProjectSelect.value ? existingProjectSelect.value.trim() : '';
+        if (!projectName) {
+          showToast('새 프로젝트를 먼저 만들어주세요', 'alert');
+          setModalMode('new');
+          return;
+        }
+      } else {
+        projectName = newProjectInput.value.trim();
+        if (!projectName) return;
+      }
+
+      const dateVal = newSessionDateInput.value;
+      const timeVal = newSessionStartTimeInput.value;
+      const customStartIso = combineDateAndTimeToIso(dateVal, timeVal);
+
+      startSessionForProject(projectName, customStartIso);
+      closeModal();
+    });
+
+    function startSessionForProject(projectName, customStartIso = null) {
+      const alreadyRunning = activeSessions.find(s => s.projectName.toLowerCase() === projectName.toLowerCase());
+      if (alreadyRunning) {
+        showToast(`"${projectName}" 작업 타이머가 이미 실행 중입니다`, 'alert');
+        return;
+      }
+
+      const startIso = customStartIso || new Date().toISOString();
+      const newSession = {
+        id: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        projectName: projectName,
+        date: startIso,
+        startTime: startIso
+      };
+
+      activeSessions.unshift(newSession);
+      saveActive();
+      renderAll();
+      showToast(`"${projectName}" 세션이 시작되었습니다`);
+    }
+
+    function endSession(sessionId) {
+      const index = activeSessions.findIndex(s => s.id === sessionId);
+      if (index === -1) return;
+
+      const current = activeSessions[index];
+      const endNow = new Date();
+      const calc = computeDurationExact(current.startTime, endNow.toISOString());
+
+      const completedEntry = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        projectName: current.projectName,
+        date: current.date,
+        startTime: current.startTime,
+        endTime: endNow.toISOString(),
+        duration: calc.formatted,
+        durationMinutes: calc.totalMinutes
+      };
+
+      activeSessions.splice(index, 1);
+      completedLogs.unshift(completedEntry);
+
+      saveActive();
+      saveLogs();
+      renderAll();
+      showToast(`"${completedEntry.projectName}" 작업 완료 (${completedEntry.duration})`);
+    }
+
+    function deleteLog(logId) {
+      completedLogs = completedLogs.filter(item => item.id !== logId);
+      saveLogs();
+      renderAll();
+      showToast('작업 기록이 삭제되었습니다');
+    }
+
+    function openEditLogModal(logId) {
+      const log = completedLogs.find(l => l.id === logId);
+      if (!log) return;
+
+      editLogId.value = log.id;
+      editLogProjectName.value = log.projectName;
+      editLogDate.value = toInputDateFormat(log.date || log.startTime);
+      editLogStartTime.value = toInputTimeFormat(log.startTime);
+      editLogEndTime.value = toInputTimeFormat(log.endTime);
+
+      updateEditLogDurationPreview();
+
+      editLogModal.classList.remove('opacity-0', 'pointer-events-none');
+      editLogModalCard.classList.remove('scale-95');
+      editLogModalCard.classList.add('scale-100');
+    }
+
+    function closeEditLogModal() {
+      editLogModal.classList.add('opacity-0', 'pointer-events-none');
+      editLogModalCard.classList.remove('scale-100');
+      editLogModalCard.classList.add('scale-95');
+    }
+
+    function updateEditLogDurationPreview() {
+      const dateVal = editLogDate.value;
+      const startVal = editLogStartTime.value;
+      const endVal = editLogEndTime.value;
+
+      if (!dateVal || !startVal || !endVal) {
+        editLogCalculatedDuration.innerText = '--';
+        return;
+      }
+
+      const startIso = combineDateAndTimeToIso(dateVal, startVal);
+      const endIso = combineDateAndTimeToIso(dateVal, endVal);
+      const calc = computeDurationExact(startIso, endIso);
+      editLogCalculatedDuration.innerText = calc.formatted;
+    }
+
+    editLogDate.addEventListener('input', updateEditLogDurationPreview);
+    editLogStartTime.addEventListener('input', updateEditLogDurationPreview);
+    editLogEndTime.addEventListener('input', updateEditLogDurationPreview);
+
+    closeEditLogModalBtn.addEventListener('click', closeEditLogModal);
+    cancelEditLogModalBtn.addEventListener('click', closeEditLogModal);
+    editLogModal.addEventListener('click', (e) => {
+      if (e.target === editLogModal) closeEditLogModal();
+    });
+
+    editLogForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = editLogId.value;
+      const index = completedLogs.findIndex(l => l.id === id);
+      if (index === -1) return;
+
+      const dateVal = editLogDate.value;
+      const startVal = editLogStartTime.value;
+      const endVal = editLogEndTime.value;
+      const projVal = editLogProjectName.value.trim();
+
+      const startIso = combineDateAndTimeToIso(dateVal, startVal);
+      const endIso = combineDateAndTimeToIso(dateVal, endVal);
+      const calc = computeDurationExact(startIso, endIso);
+
+      completedLogs[index].projectName = projVal;
+      completedLogs[index].date = startIso;
+      completedLogs[index].startTime = startIso;
+      completedLogs[index].endTime = endIso;
+      completedLogs[index].duration = calc.formatted;
+      completedLogs[index].durationMinutes = calc.totalMinutes;
+
+      saveLogs();
+      renderAll();
+      closeEditLogModal();
+      showToast('작업 기록이 수정되었습니다');
+    });
+
+    function openEditActiveModal(sessionId) {
+      const session = activeSessions.find(s => s.id === sessionId);
+      if (!session) return;
+
+      editActiveSessionId.value = session.id;
+      editActiveProjectName.innerText = session.projectName;
+      editActiveDateInput.value = toInputDateFormat(session.startTime);
+      editActiveTimeInput.value = toInputTimeFormat(session.startTime);
+
+      editActiveModal.classList.remove('opacity-0', 'pointer-events-none');
+      editActiveModalCard.classList.remove('scale-95');
+      editActiveModalCard.classList.add('scale-100');
+    }
+
+    function closeEditActiveModal() {
+      editActiveModal.classList.add('opacity-0', 'pointer-events-none');
+      editActiveModalCard.classList.remove('scale-100');
+      editActiveModalCard.classList.add('scale-95');
+    }
+
+    closeEditActiveModalBtn.addEventListener('click', closeEditActiveModal);
+    cancelEditActiveModalBtn.addEventListener('click', closeEditActiveModal);
+    editActiveModal.addEventListener('click', (e) => {
+      if (e.target === editActiveModal) closeEditActiveModal();
+    });
+
+    editActiveForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = editActiveSessionId.value;
+      const session = activeSessions.find(s => s.id === id);
+      if (!session) return;
+
+      const newStartIso = combineDateAndTimeToIso(editActiveDateInput.value, editActiveTimeInput.value);
+      session.date = newStartIso;
+      session.startTime = newStartIso;
+
+      saveActive();
+      renderAll();
+      closeEditActiveModal();
+      showToast('진행 중인 세션의 시작 시간이 변경되었습니다');
+    });
+
+    function openManualLogModal() {
+      updateProjectDataLists();
+      const now = new Date();
+      manualDateInput.value = toInputDateFormat(now.toISOString());
+      
+      const oneHourAgo = new Date(now.getTime() - 3600000);
+      manualStartTimeInput.value = toInputTimeFormat(oneHourAgo.toISOString());
+      manualEndTimeInput.value = toInputTimeFormat(now.toISOString());
+      manualProjectInput.value = '';
+
+      updateManualDurationPreview();
+
+      manualLogModal.classList.remove('opacity-0', 'pointer-events-none');
+      manualLogModalCard.classList.remove('scale-95');
+      manualLogModalCard.classList.add('scale-100');
+      setTimeout(() => manualProjectInput.focus(), 60);
+    }
+
+    function closeManualLogModal() {
+      manualLogModal.classList.add('opacity-0', 'pointer-events-none');
+      manualLogModalCard.classList.remove('scale-100');
+      manualLogModalCard.classList.add('scale-95');
+    }
+
+    function updateManualDurationPreview() {
+      const dateVal = manualDateInput.value;
+      const startVal = manualStartTimeInput.value;
+      const endVal = manualEndTimeInput.value;
+
+      if (!dateVal || !startVal || !endVal) {
+        manualCalculatedDuration.innerText = '--';
+        return;
+      }
+
+      const startIso = combineDateAndTimeToIso(dateVal, startVal);
+      const endIso = combineDateAndTimeToIso(dateVal, endVal);
+      const calc = computeDurationExact(startIso, endIso);
+      manualCalculatedDuration.innerText = calc.formatted;
+    }
+
+    manualDateInput.addEventListener('input', updateManualDurationPreview);
+    manualStartTimeInput.addEventListener('input', updateManualDurationPreview);
+    manualEndTimeInput.addEventListener('input', updateManualDurationPreview);
+
+    openManualLogBtn.addEventListener('click', openManualLogModal);
+    closeManualLogModalBtn.addEventListener('click', closeManualLogModal);
+    cancelManualLogModalBtn.addEventListener('click', closeManualLogModal);
+    manualLogModal.addEventListener('click', (e) => {
+      if (e.target === manualLogModal) closeManualLogModal();
+    });
+
+    manualLogForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const projectName = manualProjectInput.value.trim();
+      if (!projectName) return;
+
+      const dateVal = manualDateInput.value;
+      const startVal = manualStartTimeInput.value;
+      const endVal = manualEndTimeInput.value;
+
+      const startIso = combineDateAndTimeToIso(dateVal, startVal);
+      const endIso = combineDateAndTimeToIso(dateVal, endVal);
+      const calc = computeDurationExact(startIso, endIso);
+
+      const newLog = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        projectName: projectName,
+        date: startIso,
+        startTime: startIso,
+        endTime: endIso,
+        duration: calc.formatted,
+        durationMinutes: calc.totalMinutes
+      };
+
+      completedLogs.unshift(newLog);
+      saveLogs();
+      renderAll();
+      closeManualLogModal();
+      showToast(`"${projectName}" 세션 추가 완료 (${calc.formatted})`);
+    });
+
+    function toggleProjectAccordion(projectName) {
+      if (expandedProjects.has(projectName)) {
+        expandedProjects.delete(projectName);
+      } else {
+        expandedProjects.add(projectName);
+      }
+      renderProjects();
+    }
+
+    function renderActive() {
+      activeContainer.innerHTML = '';
+
+      if (activeSessions.length === 0) {
+        noActiveState.classList.remove('hidden');
+        activeSessionsBadge.innerText = '0 Running';
+        activeSessionsBadge.className = 'text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full';
+        return;
+      }
+
+      noActiveState.classList.add('hidden');
+      activeSessionsBadge.innerText = `${activeSessions.length} Running`;
+      activeSessionsBadge.className = 'text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200';
+
+      activeSessions.forEach(session => {
+        const card = document.createElement('div');
+        card.className = 'bg-white p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-xs relative overflow-hidden flex flex-col justify-between';
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                  RECORDING
+                </span>
+                <span class="text-xs text-slate-400 font-medium">${formatDate(session.date)}</span>
+              </div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate" title="${escapeHtml(session.projectName)}">
+                ${escapeHtml(session.projectName)}
+              </h3>
+            </div>
+            <button 
+              onclick="endSession('${session.id}')" 
+              class="inline-flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition shrink-0"
+              title="타이머 종료 및 기록 저장"
+            >
+              <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
+              <span>END</span>
+            </button>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div class="text-xs text-slate-500 flex items-center gap-1.5">
+              <span class="text-slate-400">Started:</span> 
+              <span class="font-semibold text-slate-700 font-mono-time">${formatTime(session.startTime)}</span>
+              <button 
+                onclick="openEditActiveModal('${session.id}')" 
+                title="시작 시간 수정"
+                class="text-indigo-600 hover:text-indigo-800 p-1 hover:bg-indigo-50 rounded transition"
+              >
+                <i data-lucide="pencil" class="w-3 h-3"></i>
+              </button>
+            </div>
+            <div class="text-right">
+              <div class="font-mono-time text-base sm:text-lg font-bold text-indigo-600" data-timer-id="${session.id}">
+                ${formatLiveElapsed(session.startTime)}
+              </div>
+            </div>
+          </div>
+        `;
+        activeContainer.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderProjects() {
+      projectsGrid.innerHTML = '';
+      const query = searchInput.value.toLowerCase().trim();
+
+      const distinct = getDistinctProjects();
+      const filtered = distinct.filter(p => p.toLowerCase().includes(query));
+
+      if (filtered.length === 0) {
+        noProjectsState.classList.remove('hidden');
+        return;
+      }
+      noProjectsState.classList.add('hidden');
+
+      filtered.forEach(projectName => {
+        const projectLogs = completedLogs.filter(l => l.projectName.toLowerCase() === projectName.toLowerCase());
+        const activeForProj = activeSessions.find(s => s.projectName.toLowerCase() === projectName.toLowerCase());
+
+        const totalMinutes = projectLogs.reduce((acc, curr) => acc + (curr.durationMinutes || 0), 0);
+        const totalHours = Math.floor(totalMinutes / 60);
+        const remMinutes = totalMinutes % 60;
+        const formattedTotal = `${totalHours}h ${remMinutes}m`;
+
+        const isExpanded = expandedProjects.has(projectName);
+
+        let lastWorked = '--';
+        if (activeForProj) {
+          lastWorked = '현재 진행 중';
+        } else if (projectLogs.length > 0) {
+          lastWorked = formatDate(projectLogs[0].date);
+        }
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:border-slate-300 transition flex flex-col justify-between overflow-hidden';
+
+        let cardHtml = `
+          <div class="p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded-md ${activeForProj ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600'}">
+                    총 ${projectLogs.length}회 기록
+                  </span>
+                  ${activeForProj ? '<span class="text-xs font-bold text-emerald-600 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 진행 중</span>' : ''}
+                </div>
+                <h3 class="text-base font-bold text-slate-900 truncate" title="${escapeHtml(projectName)}">${escapeHtml(projectName)}</h3>
+                <p class="text-xs text-slate-400 mt-0.5">최근 작업: <span class="text-slate-600 font-medium">${lastWorked}</span></p>
+              </div>
+
+              <div class="text-right shrink-0">
+                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Time</p>
+                <div class="font-mono-time text-lg font-extrabold text-indigo-600 mt-0.5">
+                  ${formattedTotal}
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button 
+                onclick="toggleProjectAccordion('${escapeHtml(projectName)}')"
+                class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition"
+              >
+                <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
+                <span>히스토리 ${isExpanded ? '닫기' : '보기'} (${projectLogs.length})</span>
+              </button>
+
+              <div class="flex items-center gap-1.5">
+                ${
+                  activeForProj 
+                  ? `<button onclick="endSession('${activeForProj.id}')" class="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-bold rounded-xl transition">
+                      <i data-lucide="square" class="w-3 h-3 fill-rose-600"></i>
+                      <span>End Timer</span>
+                    </button>`
+                  : `<button onclick="startSessionForProject('${escapeHtml(projectName)}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 text-xs font-bold rounded-xl transition">
+                      <i data-lucide="play" class="w-3 h-3 fill-indigo-700"></i>
+                      <span>Resume Work</span>
+                    </button>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (isExpanded) {
+          cardHtml += `
+            <div class="bg-slate-50 border-t border-slate-100 p-4 space-y-2">
+              <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <span>Date & Time</span>
+                <span>Actions</span>
+              </div>
+              ${
+                projectLogs.length === 0 
+                ? `<p class="text-xs text-slate-400 italic py-2">완료된 세션 기록이 없습니다.</p>`
+                : projectLogs.map(log => `
+                  <div class="bg-white p-2.5 rounded-xl border border-slate-200/70 flex items-center justify-between text-xs">
+                    <div>
+                      <div class="font-medium text-slate-800">${formatDate(log.date)}</div>
+                      <div class="font-mono-time text-[11px] text-slate-400">
+                        ${formatTime(log.startTime)} → ${formatTime(log.endTime)}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="px-2 py-0.5 font-mono-time font-bold bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100 text-xs">
+                        ${log.duration}
+                      </span>
+                      <button 
+                        onclick="openEditLogModal('${log.id}')" 
+                        title="기록 수정"
+                        class="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition"
+                      >
+                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button 
+                        onclick="deleteLog('${log.id}')" 
+                        title="기록 삭제"
+                        class="text-slate-300 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition"
+                      >
+                        <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                  </div>
+                `).join('')
+              }
+            </div>
+          `;
+        }
+
+        card.innerHTML = cardHtml;
+        projectsGrid.appendChild(card);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderLogs() {
+      const query = searchInput.value.toLowerCase().trim();
+      const filtered = completedLogs.filter(log => 
+        log.projectName.toLowerCase().includes(query)
+      );
+
+      logsTableBody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        noLogsState.classList.remove('hidden');
+        return;
+      }
+
+      noLogsState.classList.add('hidden');
+
+      filtered.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors group';
+
+        tr.innerHTML = `
+          <td class="py-3.5 px-5 font-medium text-slate-600 whitespace-nowrap text-xs">
+            ${formatDate(log.date)}
+          </td>
+          <td class="py-3.5 px-5 font-bold text-slate-900">
+            <div class="flex items-center gap-2">
+              <span>${escapeHtml(log.projectName)}</span>
+              <button 
+                onclick="startSessionForProject('${escapeHtml(log.projectName)}')" 
+                title="이 프로젝트 바로 시작"
+                class="opacity-0 group-hover:opacity-100 hover:opacity-100 p-1 text-slate-400 hover:text-indigo-600 transition"
+              >
+                <i data-lucide="play" class="w-3 h-3"></i>
+              </button>
+            </div>
+          </td>
+          <td class="py-3.5 px-5 font-mono-time text-xs text-slate-600 whitespace-nowrap">
+            ${formatTime(log.startTime)}
+          </td>
+          <td class="py-3.5 px-5 font-mono-time text-xs text-slate-600 whitespace-nowrap">
+            ${formatTime(log.endTime)}
+          </td>
+          <td class="py-3.5 px-5 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold font-mono-time bg-indigo-50 text-indigo-700 border border-indigo-100">
+              ${log.duration}
+            </span>
+          </td>
+          <td class="py-3.5 px-5 text-right whitespace-nowrap">
+            <div class="inline-flex items-center gap-1">
+              <button 
+                onclick="openEditLogModal('${log.id}')" 
+                title="기록 수정"
+                class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition"
+              >
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button 
+                onclick="deleteLog('${log.id}')" 
+                title="기록 삭제"
+                class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+              >
+                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+        `;
+
+        logsTableBody.appendChild(tr);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderStats() {
+      statActiveCount.innerText = activeSessions.length;
+      
+      const distinct = getDistinctProjects();
+      statProjectCount.innerText = distinct.length;
+
+      let totalAllMinutes = completedLogs.reduce((acc, curr) => acc + (curr.durationMinutes || 0), 0);
+      const allHrs = Math.floor(totalAllMinutes / 60);
+      const allMins = totalAllMinutes % 60;
+      statAllTime.innerText = `${allHrs}h ${allMins}m`;
+
+      const todayStr = new Date().toDateString();
+      let todayMinutes = completedLogs
+        .filter(l => new Date(l.date).toDateString() === todayStr)
+        .reduce((acc, curr) => acc + (curr.durationMinutes || 0), 0);
+
+      const todayHrs = Math.floor(todayMinutes / 60);
+      const todayMins = todayMinutes % 60;
+      statTodayTime.innerText = `${todayHrs}h ${todayMins}m`;
+    }
+
+    function renderAll() {
+      renderActive();
+      renderProjects();
+      renderLogs();
+      renderStats();
+      updateProjectDataLists();
+    }
+
+    function startTicker() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (activeSessions.length === 0) return;
+
+        activeSessions.forEach(session => {
+          const el = document.querySelector(`[data-timer-id="${session.id}"]`);
+          if (el) {
+            el.innerText = formatLiveElapsed(session.startTime);
+          }
+        });
+      }, 1000);
+    }
+
+    tabProjects.addEventListener('click', () => {
+      currentTab = 'projects';
+      tabProjects.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-white text-indigo-600 shadow-xs';
+      tabLogs.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 text-slate-600 hover:text-slate-900';
+      viewProjects.classList.remove('hidden');
+      viewLogs.classList.add('hidden');
+    });
+
+    tabLogs.addEventListener('click', () => {
+      currentTab = 'logs';
+      tabLogs.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-white text-indigo-600 shadow-xs';
+      tabProjects.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 text-slate-600 hover:text-slate-900';
+      viewLogs.classList.remove('hidden');
+      viewProjects.classList.add('hidden');
+    });
+
+    searchInput.addEventListener('input', () => {
+      renderProjects();
+      renderLogs();
+    });
+
+    exportCsvBtn.addEventListener('click', () => {
+      if (completedLogs.length === 0) {
+        showToast('내보낼 세션 데이터가 없습니다', 'alert');
+        return;
+      }
+
+      const headers = ['Date', 'Project Name', 'Start Time', 'Finish Time', 'Duration', 'Duration (Minutes)'];
+      const rows = completedLogs.map(item => [
+        `"${formatDate(item.date)}"`,
+        `"${item.projectName.replace(/"/g, '""')}"`,
+        `"${formatTime(item.startTime)}"`,
+        `"${formatTime(item.endTime)}"`,
+        `"${item.duration}"`,
+        item.durationMinutes || 0
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `work_sessions_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('CSV 파일이 다운로드되었습니다');
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    let toastTimeout = null;
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.innerText = msg;
+      if (type === 'alert') {
+        toastIcon.setAttribute('data-lucide', 'alert-circle');
+        toastIcon.className = 'w-4 h-4 text-amber-400';
+      } else {
+        toastIcon.setAttribute('data-lucide', 'check-circle');
+        toastIcon.className = 'w-4 h-4 text-emerald-400';
+      }
+
+      if (window.lucide) lucide.createIcons();
+
+      toast.classList.remove('opacity-0', 'translate-y-16', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-16', 'pointer-events-none');
+      }, 3000);
+    }
+
+    window.endSession = endSession;
+    window.deleteLog = deleteLog;
+    window.startSessionForProject = startSessionForProject;
+    window.toggleProjectAccordion = toggleProjectAccordion;
+    window.openEditLogModal = openEditLogModal;
+    window.openEditActiveModal = openEditActiveModal;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      renderAll();
+      startTicker();
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
