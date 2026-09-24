@@ -115,7 +115,7 @@
       </div>
 
       <div id="overviewView" class="p-6">
-        <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start"></div>
         <div id="emptyOverview" class="hidden py-16 text-center">
           <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
             <i data-lucide="folder-plus" class="w-6 h-6"></i>
@@ -158,27 +158,23 @@
         <button id="btnCloseStartModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- Mode Selector: Existing vs New -->
       <div class="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600">
         <button type="button" id="btnStartModeExisting" class="flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all">Existing Project</button>
         <button type="button" id="btnStartModeNew" class="flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">+ New Project</button>
       </div>
 
       <form id="startTimerForm" class="space-y-4">
-        <!-- Existing Project Dropdown -->
         <div id="startExistingContainer">
           <label class="block text-xs font-semibold text-slate-700 mb-1">Choose Existing Project</label>
           <select id="startExistingSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
           </select>
         </div>
 
-        <!-- New Project Input -->
         <div id="startNewContainer" class="hidden">
           <label class="block text-xs font-semibold text-slate-700 mb-1">New Project Name</label>
           <input id="startProjectInput" type="text" placeholder="e.g., Global Brand Identity" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
         </div>
 
-        <!-- Round Selector -->
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
           <select id="startRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
@@ -213,27 +209,23 @@
         <button id="btnCloseManualModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
-      <!-- Mode Selector: Existing vs New -->
       <div class="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600">
         <button type="button" id="btnManualModeExisting" class="flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all">Existing Project</button>
         <button type="button" id="btnManualModeNew" class="flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">+ New Project</button>
       </div>
 
       <form id="manualSessionForm" class="space-y-4">
-        <!-- Existing Project Dropdown -->
         <div id="manualExistingContainer">
           <label class="block text-xs font-semibold text-slate-700 mb-1">Choose Existing Project</label>
           <select id="manualExistingSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
           </select>
         </div>
 
-        <!-- New Project Input -->
         <div id="manualNewContainer" class="hidden">
           <label class="block text-xs font-semibold text-slate-700 mb-1">New Project Name</label>
           <input id="manualProjectInput" type="text" placeholder="e.g., UI Animation" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
         </div>
 
-        <!-- Round Selector -->
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
           <select id="manualRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
@@ -318,6 +310,7 @@
     let searchQuery = '';
     let startMode = 'existing';
     let manualMode = 'existing';
+    const expandedProjects = new Set(); // Tracks open accordions in Projects Overview
 
     function init() {
       const savedTitle = localStorage.getItem(STORAGE_KEY_TITLE) || 'TimeFlow';
@@ -453,7 +446,6 @@
       document.getElementById('tabLogs').onclick = () => switchTab('logs');
       document.getElementById('searchInput').oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderLists(); };
 
-      // Modal Mode Toggles
       document.getElementById('btnStartModeExisting').onclick = () => setStartMode('existing');
       document.getElementById('btnStartModeNew').onclick = () => setStartMode('new');
       document.getElementById('btnManualModeExisting').onclick = () => setManualMode('existing');
@@ -637,6 +629,15 @@
       document.getElementById('editModal').classList.remove('hidden');
     }
 
+    function toggleProjectHistory(projectName) {
+      if (expandedProjects.has(projectName)) {
+        expandedProjects.delete(projectName);
+      } else {
+        expandedProjects.add(projectName);
+      }
+      renderLists();
+    }
+
     function renderMetrics() {
       const today = getTodayString();
       const todayMs = sessions.filter(s => s.date === today).reduce((acc, s) => acc + s.durationMs, 0);
@@ -728,8 +729,40 @@
         projectsGrid.innerHTML = projectNames.map(name => {
           const p = grouped[name];
           const latestRound = p.sessions[0]?.round || 'Round 1';
+          const isExpanded = expandedProjects.has(name);
+
+          // Render embedded session history rows inside tile
+          const historyHtml = isExpanded ? `
+            <div class="mt-4 pt-4 border-t border-slate-100 space-y-2">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Tracked History</p>
+              <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                ${p.sessions.map(s => `
+                  <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                    <div class="space-y-0.5">
+                      <div class="flex items-center gap-1.5">
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-indigo-700 border border-slate-200">${s.round || 'Round 1'}</span>
+                        <span class="text-slate-600 text-[11px] font-medium">${s.date}</span>
+                      </div>
+                      <div class="text-[11px] text-slate-400 mono">${s.startTime} -${s.finishTime}</div>
+                    </div>
+                    <div class="text-right flex items-center gap-2">
+                      <div>
+                        <div class="font-bold text-slate-800 mono">${formatDuration(s.durationMs)}</div>
+                        <div class="text-[10px] font-semibold text-emerald-600 mono">${calculateEarnings(s.durationMs)}</div>
+                      </div>
+                      <div class="flex items-center pl-1 border-l border-slate-200">
+                        <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="deleteSession('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : '';
+
           return `
-            <div class="p-5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between">
+            <div class="p-5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between shadow-xs">
               <div>
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">${p.sessions.length} sessions</span>
@@ -741,9 +774,16 @@
                   <p class="text-sm font-bold text-emerald-600 mono">${calculateEarnings(p.totalMs)}</p>
                 </div>
               </div>
+
+              ${historyHtml}
+
               <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <button onclick="startQuickTimer('${name}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-                  <i data-lucide="play" class="w-3.5 h-3.5 fill-indigo-600"></i> Track Again (Next Round)
+                <button onclick="toggleProjectHistory('${name.replace(/'/g, "\\'")}')" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                  <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
+                  ${isExpanded ? 'Hide History' : `View History (${p.sessions.length})`}
+                </button>
+                <button onclick="startQuickTimer('${name.replace(/'/g, "\\'")}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-indigo-600"></i> Track Again
                 </button>
               </div>
             </div>
@@ -754,7 +794,6 @@
     }
 
     function startQuickTimer(name) {
-      // Find latest round used for this project and increment if possible
       const prevSessions = sessions.filter(s => s.project === name);
       let nextRound = 'Round 1';
       if (prevSessions.length > 0) {
