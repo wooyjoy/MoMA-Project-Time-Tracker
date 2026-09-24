@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TimeFlow - Work Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            brand: { 50: '#eef2ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-100">
+          <i data-lucide="clock" class="w-5 h-5"></i>
+        </div>
+        <div class="flex items-center gap-2 group">
+          <span id="headerWorkspaceTitle" class="text-xl font-extrabold tracking-tight text-slate-900 cursor-pointer border-b border-transparent hover:border-slate-300 transition-colors">TimeFlow</span>
+          <button id="btnEditWorkspaceTitle" class="text-slate-400 hover:text-indigo-600 transition-colors opacity-0 group-hover:opacity-100 p-1">
+            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnExportCsv" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Work Tracker Dashboard</h1>
+        <p class="text-sm text-slate-500 mt-1">Track live timers or log past working sessions by project.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btnOpenManualModal" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 active:bg-slate-100 transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-slate-500"></i> Add Past Entry
+        </button>
+        <button id="btnOpenStartModal" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-100 transition-all">
+          <i data-lucide="play" class="w-4 h-4 fill-white"></i> Track Time
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Today's Tracked</p>
+        <p id="statTodayTime" class="text-2xl font-extrabold text-slate-900 mono mt-2">0h 0m</p>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Timers</p>
+        <p id="statActiveTimers" class="text-2xl font-extrabold text-indigo-600 mono mt-2">0</p>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Tracked Projects</p>
+        <p id="statTotalProjects" class="text-2xl font-extrabold text-slate-900 mono mt-2">0</p>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">All-Time Work</p>
+        <p id="statTotalDuration" class="text-2xl font-extrabold text-slate-900 mono mt-2">0h 0m</p>
+      </div>
+    </div>
+
+    <section id="activeTimersContainer" class="hidden space-y-4">
+      <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Tracking Sessions
+      </h2>
+      <div id="activeTimersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-2 p-1 bg-slate-100/80 rounded-xl max-w-fit">
+          <button id="tabOverview" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-600 shadow-xs">Projects Overview</button>
+          <button id="tabLogs" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">Chronological Logs</button>
+        </div>
+        <div class="relative w-full sm:w-64">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input id="searchInput" type="text" placeholder="Search projects..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+        </div>
+      </div>
+      <div id="overviewView" class="p-6">
+        <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="emptyOverview" class="hidden py-16 text-center">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <i data-lucide="folder-plus" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800">No project sessions logged yet</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Click Track Time or Add Past Entry to start recording your work hours.</p>
+        </div>
+      </div>
+      <div id="logsView" class="hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50/75 border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
+              <tr>
+                <th class="px-6 py-3.5">Project</th>
+                <th class="px-6 py-3.5">Date</th>
+                <th class="px-6 py-3.5">Start Time</th>
+                <th class="px-6 py-3.5">Finish Time</th>
+                <th class="px-6 py-3.5">Duration</th>
+                <th class="px-6 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+        <div id="emptyLogs" class="hidden py-16 text-center">
+          <h3 class="text-sm font-bold text-slate-800">No sessions match your filter</h3>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="startModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Start Tracking</h3>
+        <button id="btnCloseStartModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="startTimerForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Project Name</label>
+          <input id="startProjectInput" type="text" required placeholder="e.g., Brand Campaign Animation" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
+            <input id="startDateInput" type="date" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Start Time</label>
+            <input id="startTimeInput" type="time" step="1" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all">Start Timer</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="manualModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Add Past Session</h3>
+        <button id="btnCloseManualModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="manualSessionForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Project Name</label>
+          <input id="manualProjectInput" type="text" required placeholder="e.g., 3D Lookdev" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
+          <input id="manualDateInput" type="date" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Start Time</label>
+            <input id="manualStartInput" type="time" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Finish Time</label>
+            <input id="manualEndInput" type="time" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-md transition-all">Save Session</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="editModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Edit Session Log</h3>
+        <button id="btnCloseEditModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="editSessionForm" class="space-y-4">
+        <input type="hidden" id="editSessionId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Project Name</label>
+          <input id="editProjectInput" type="text" required class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
+          <input id="editDateInput" type="date" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Start Time</label>
+            <input id="editStartInput" type="time" step="1" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Finish Time</label>
+            <input id="editEndInput" type="time" step="1" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all">Update Session</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY_SESSIONS = 'tf_sessions';
+    const STORAGE_KEY_ACTIVE = 'tf_active';
+    const STORAGE_KEY_TITLE = 'tf_title';
+
+    let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]');
+    let activeTimers = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVE) || '[]');
+    let currentTab = 'overview';
+    let searchQuery = '';
+
+    function init() {
+      const savedTitle = localStorage.getItem(STORAGE_KEY_TITLE) || 'TimeFlow';
+      document.getElementById('headerWorkspaceTitle').innerText = savedTitle;
+      bindEvents();
+      render();
+      setInterval(tickActiveTimers, 1000);
+      lucide.createIcons();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
+      localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(activeTimers));
+      render();
+    }
+
+    function formatDuration(ms) {
+      if (ms < 0) ms = 0;
+      const totalSec = Math.floor(ms / 1000);
+      const hours = Math.floor(totalSec / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      return `${hours}h ${minutes}m`;
+    }
+
+    function formatTimerDisplay(ms) {
+      if (ms < 0) ms = 0;
+      const totalSec = Math.floor(ms / 1000);
+      const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSec % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    function getTodayString() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getTimeString() {
+      const d = new Date();
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    }
+
+    function bindEvents() {
+      const headerTitle = document.getElementById('headerWorkspaceTitle');
+      const btnEditTitle = document.getElementById('btnEditWorkspaceTitle');
+      const editTitleAction = () => {
+        const current = headerTitle.innerText;
+        const newTitle = prompt('Enter your Workspace Title:', current);
+        if (newTitle && newTitle.trim()) {
+          headerTitle.innerText = newTitle.trim();
+          localStorage.setItem(STORAGE_KEY_TITLE, newTitle.trim());
+        }
+      };
+      headerTitle.addEventListener('click', editTitleAction);
+      btnEditTitle.addEventListener('click', editTitleAction);
+
+      document.getElementById('tabOverview').onclick = () => switchTab('overview');
+      document.getElementById('tabLogs').onclick = () => switchTab('logs');
+      document.getElementById('searchInput').oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderLists(); };
+
+      const startModal = document.getElementById('startModal');
+      document.getElementById('btnOpenStartModal').onclick = () => {
+        document.getElementById('startDateInput').value = getTodayString();
+        document.getElementById('startTimeInput').value = getTimeString();
+        startModal.classList.remove('hidden');
+        document.getElementById('startProjectInput').focus();
+      };
+      document.getElementById('btnCloseStartModal').onclick = () => startModal.classList.add('hidden');
+
+      const manualModal = document.getElementById('manualModal');
+      document.getElementById('btnOpenManualModal').onclick = () => {
+        document.getElementById('manualDateInput').value = getTodayString();
+        manualModal.classList.remove('hidden');
+        document.getElementById('manualProjectInput').focus();
+      };
+      document.getElementById('btnCloseManualModal').onclick = () => manualModal.classList.add('hidden');
+
+      const editModal = document.getElementById('editModal');
+      document.getElementById('btnCloseEditModal').onclick = () => editModal.classList.add('hidden');
+
+      document.getElementById('startTimerForm').onsubmit = (e) => {
+        e.preventDefault();
+        const name = document.getElementById('startProjectInput').value.trim();
+        const date = document.getElementById('startDateInput').value;
+        const time = document.getElementById('startTimeInput').value;
+        const startTimestamp = new Date(`${date}T${time}`).getTime() || Date.now();
+        activeTimers.push({ id: 'act_' + Date.now(), project: name, date, startTime: time, startTimestamp });
+        saveState();
+        e.target.reset();
+        startModal.classList.add('hidden');
+      };
+
+      document.getElementById('manualSessionForm').onsubmit = (e) => {
+        e.preventDefault();
+        const name = document.getElementById('manualProjectInput').value.trim();
+        const date = document.getElementById('manualDateInput').value;
+        const start = document.getElementById('manualStartInput').value;
+        const end = document.getElementById('manualEndInput').value;
+        const startMs = new Date(`${date}T${start}`).getTime();
+        const endMs = new Date(`${date}T${end}`).getTime();
+        const durationMs = Math.max(0, endMs - startMs);
+        sessions.unshift({ id: 'sess_' + Date.now(), project: name, date, startTime: start, finishTime: end, durationMs });
+        saveState();
+        e.target.reset();
+        manualModal.classList.add('hidden');
+      };
+
+      document.getElementById('editSessionForm').onsubmit = (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editSessionId').value;
+        const name = document.getElementById('editProjectInput').value.trim();
+        const date = document.getElementById('editDateInput').value;
+        const start = document.getElementById('editStartInput').value;
+        const end = document.getElementById('editEndInput').value;
+        const startMs = new Date(`${date}T${start}`).getTime();
+        const endMs = new Date(`${date}T${end}`).getTime();
+        const session = sessions.find(s => s.id === id);
+        if (session) {
+          session.project = name;
+          session.date = date;
+          session.startTime = start;
+          session.finishTime = end;
+          session.durationMs = Math.max(0, endMs - startMs);
+          saveState();
+        }
+        editModal.classList.add('hidden');
+      };
+
+      document.getElementById('btnExportCsv').onclick = exportCsv;
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const tOverview = document.getElementById('tabOverview');
+      const tLogs = document.getElementById('tabLogs');
+      const vOverview = document.getElementById('overviewView');
+      const vLogs = document.getElementById('logsView');
+
+      if (tab === 'overview') {
+        tOverview.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-xs';
+        tLogs.className = 'px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900';
+        vOverview.classList.remove('hidden');
+        vLogs.classList.add('hidden');
+      } else {
+        tLogs.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-xs';
+        tOverview.className = 'px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900';
+        vLogs.classList.remove('hidden');
+        vOverview.classList.add('hidden');
+      }
+      renderLists();
+    }
+
+    function tickActiveTimers() {
+      if (!activeTimers.length) return;
+      const now = Date.now();
+      activeTimers.forEach(item => {
+        const el = document.getElementById(`timerDisplay_${item.id}`);
+        if (el) el.innerText = formatTimerDisplay(now - item.startTimestamp);
+      });
+    }
+
+    function stopTimer(id) {
+      const idx = activeTimers.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      const timer = activeTimers[idx];
+      const now = Date.now();
+      const finishTime = getTimeString();
+      const durationMs = Math.max(0, now - timer.startTimestamp);
+
+      sessions.unshift({
+        id: 'sess_' + Date.now(),
+        project: timer.project,
+        date: timer.date,
+        startTime: timer.startTime,
+        finishTime,
+        durationMs
+      });
+      activeTimers.splice(idx, 1);
+      saveState();
+    }
+
+    function deleteSession(id) {
+      if (confirm('Delete this session record?')) {
+        sessions = sessions.filter(s => s.id !== id);
+        saveState();
+      }
+    }
+
+    function openEditModal(id) {
+      const s = sessions.find(item => item.id === id);
+      if (!s) return;
+      document.getElementById('editSessionId').value = s.id;
+      document.getElementById('editProjectInput').value = s.project;
+      document.getElementById('editDateInput').value = s.date;
+      document.getElementById('editStartInput').value = s.startTime;
+      document.getElementById('editEndInput').value = s.finishTime;
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function renderMetrics() {
+      const today = getTodayString();
+      const todayMs = sessions.filter(s => s.date === today).reduce((acc, s) => acc + s.durationMs, 0);
+      const totalMs = sessions.reduce((acc, s) => acc + s.durationMs, 0);
+      const distinctProjects = new Set([...sessions.map(s => s.project), ...activeTimers.map(t => t.project)]).size;
+
+      document.getElementById('statTodayTime').innerText = formatDuration(todayMs);
+      document.getElementById('statActiveTimers').innerText = activeTimers.length;
+      document.getElementById('statTotalProjects').innerText = distinctProjects;
+      document.getElementById('statTotalDuration').innerText = formatDuration(totalMs);
+    }
+
+    function renderActiveTimers() {
+      const container = document.getElementById('activeTimersContainer');
+      const list = document.getElementById('activeTimersList');
+      if (!activeTimers.length) {
+        container.classList.add('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      container.classList.remove('hidden');
+      list.innerHTML = activeTimers.map(t => `
+        <div class="bg-indigo-900 text-white p-5 rounded-2xl shadow-lg border border-indigo-700/50 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs uppercase font-bold text-indigo-300">Live Session</span>
+              <span class="text-xs text-indigo-200">${t.date}</span>
+            </div>
+            <h4 class="text-lg font-bold mt-1 truncate">${t.project}</h4>
+            <div class="text-xs text-indigo-200 mt-1">Started at ${t.startTime}</div>
+          </div>
+          <div class="mt-6 flex items-baseline justify-between pt-4 border-t border-indigo-800">
+            <span id="timerDisplay_${t.id}" class="text-2xl font-extrabold mono">${formatTimerDisplay(Date.now() - t.startTimestamp)}</span>
+            <button onclick="stopTimer('${t.id}')" class="px-4 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-all shadow-md">END</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderLists() {
+      const filteredSessions = sessions.filter(s => s.project.toLowerCase().includes(searchQuery));
+      const tbody = document.getElementById('logsTableBody');
+      const emptyLogs = document.getElementById('emptyLogs');
+
+      if (!filteredSessions.length) {
+        tbody.innerHTML = '';
+        emptyLogs.classList.remove('hidden');
+      } else {
+        emptyLogs.classList.add('hidden');
+        tbody.innerHTML = filteredSessions.map(s => `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="px-6 py-4 font-semibold text-slate-800">${s.project}</td>
+            <td class="px-6 py-4 text-slate-500">${s.date}</td>
+            <td class="px-6 py-4 mono text-slate-500">${s.startTime}</td>
+            <td class="px-6 py-4 mono text-slate-500">${s.finishTime}</td>
+            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 mono">${formatDuration(s.durationMs)}</span></td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button onclick="deleteSession('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      const projectsGrid = document.getElementById('projectsGrid');
+      const emptyOverview = document.getElementById('emptyOverview');
+      const grouped = {};
+
+      sessions.forEach(s => {
+        if (!grouped[s.project]) grouped[s.project] = { totalMs: 0, sessions: [] };
+        grouped[s.project].totalMs += s.durationMs;
+        grouped[s.project].sessions.push(s);
+      });
+
+      const projectNames = Object.keys(grouped).filter(name => name.toLowerCase().includes(searchQuery));
+
+      if (!projectNames.length) {
+        projectsGrid.innerHTML = '';
+        emptyOverview.classList.remove('hidden');
+      } else {
+        emptyOverview.classList.add('hidden');
+        projectsGrid.innerHTML = projectNames.map(name => {
+          const p = grouped[name];
+          return `
+            <div class="p-5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between">
+              <div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">${p.sessions.length} sessions</span>
+                <h3 class="text-base font-bold text-slate-900 mt-1 truncate">${name}</h3>
+                <p class="text-xl font-extrabold text-indigo-600 mono mt-2">${formatDuration(p.totalMs)}</p>
+              </div>
+              <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                <button onclick="startQuickTimer('${name}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-indigo-600"></i> Track Again
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      lucide.createIcons();
+    }
+
+    function startQuickTimer(name) {
+      activeTimers.push({
+        id: 'act_' + Date.now(),
+        project: name,
+        date: getTodayString(),
+        startTime: getTimeString(),
+        startTimestamp: Date.now()
+      });
+      saveState();
+    }
+
+    function exportCsv() {
+      if (!sessions.length) { alert('No sessions to export.'); return; }
+      let csv = 'Project,Date,Start Time,Finish Time,Duration (Hours:Minutes),Duration (ms)\n';
+      sessions.forEach(s => {
+        csv += `"${s.project}","${s.date}","${s.startTime}","${s.finishTime}","${formatDuration(s.durationMs)}",${s.durationMs}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Work_Time_Logs_${getTodayString()}.csv`;
+      a.click();
+    }
+
+    function render() {
+      renderMetrics();
+      renderActiveTimers();
+      renderLists();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
