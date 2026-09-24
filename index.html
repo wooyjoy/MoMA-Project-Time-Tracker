@@ -66,12 +66,8 @@
       </div>
     </div>
 
-    <!-- 5 Metrics Cards (Including $90/hr Rate Earnings) -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Today's Tracked</p>
-        <p id="statTodayTime" class="text-2xl font-extrabold text-slate-900 mono mt-2">0h 0m</p>
-      </div>
+    <!-- 3 Metrics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Timers</p>
         <p id="statActiveTimers" class="text-2xl font-extrabold text-indigo-600 mono mt-2">0</p>
@@ -80,11 +76,7 @@
         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Tracked Projects</p>
         <p id="statTotalProjects" class="text-2xl font-extrabold text-slate-900 mono mt-2">0</p>
       </div>
-      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">All-Time Work</p>
-        <p id="statTotalDuration" class="text-2xl font-extrabold text-slate-900 mono mt-2">0h 0m</p>
-      </div>
-      <div class="bg-emerald-50/60 p-5 rounded-2xl border border-emerald-200 shadow-xs col-span-2 md:col-span-1">
+      <div class="bg-emerald-50/60 p-5 rounded-2xl border border-emerald-200 shadow-xs">
         <div class="flex items-center justify-between">
           <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Estimated Earnings</p>
           <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-200/80 text-emerald-800">$90/hr</span>
@@ -101,19 +93,25 @@
       <div id="activeTimersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- Table & Grid Section -->
+    <!-- Table, Grid & Trash Section -->
     <section class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
       <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-2 p-1 bg-slate-100/80 rounded-xl max-w-fit">
           <button id="tabOverview" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-indigo-600 shadow-xs">Projects Overview</button>
           <button id="tabLogs" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900">Chronological Logs</button>
+          <button id="tabTrash" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Trash</span>
+            <span id="trashBadge" class="hidden px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">0</span>
+          </button>
         </div>
-        <div class="relative w-full sm:w-64">
+        <div id="searchWrapper" class="relative w-full sm:w-64">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
           <input id="searchInput" type="text" placeholder="Search projects or rounds..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
         </div>
       </div>
 
+      <!-- Overview View -->
       <div id="overviewView" class="p-6">
         <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start"></div>
         <div id="emptyOverview" class="hidden py-16 text-center">
@@ -125,6 +123,7 @@
         </div>
       </div>
 
+      <!-- Chronological Logs View -->
       <div id="logsView" class="hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-600">
@@ -145,6 +144,39 @@
         </div>
         <div id="emptyLogs" class="hidden py-16 text-center">
           <h3 class="text-sm font-bold text-slate-800">No sessions match your filter</h3>
+        </div>
+      </div>
+
+      <!-- Deleted Tracks / Trash View -->
+      <div id="trashView" class="hidden">
+        <div class="p-4 bg-amber-50/60 border-b border-amber-100 flex items-center justify-between text-xs text-amber-800">
+          <div class="flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600"></i>
+            <span>Deleted sessions remain in Trash for <strong>30 days</strong> before permanent removal.</span>
+          </div>
+          <button id="btnEmptyTrash" class="px-3 py-1 bg-white hover:bg-rose-50 text-rose-600 font-bold rounded-lg border border-rose-200 transition-all text-xs">Empty Trash</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50/75 border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
+              <tr>
+                <th class="px-6 py-3.5">Project</th>
+                <th class="px-6 py-3.5">Round</th>
+                <th class="px-6 py-3.5">Original Date</th>
+                <th class="px-6 py-3.5">Duration</th>
+                <th class="px-6 py-3.5">Retention</th>
+                <th class="px-6 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="trashTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+        <div id="emptyTrash" class="hidden py-16 text-center">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <i data-lucide="trash" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-sm font-bold text-slate-800">Trash is empty</h3>
+          <p class="text-xs text-slate-400 mt-1">Deleted sessions will appear here for 30 days.</p>
         </div>
       </div>
     </section>
@@ -301,18 +333,22 @@
   <script>
     const STORAGE_KEY_SESSIONS = 'tf_sessions';
     const STORAGE_KEY_ACTIVE = 'tf_active';
+    const STORAGE_KEY_TRASH = 'tf_trash';
     const STORAGE_KEY_TITLE = 'tf_title';
     const HOURLY_RATE = 90; // $90/hr
+    const RETENTION_DAYS = 30;
 
     let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]');
     let activeTimers = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVE) || '[]');
+    let trash = JSON.parse(localStorage.getItem(STORAGE_KEY_TRASH) || '[]');
     let currentTab = 'overview';
     let searchQuery = '';
     let startMode = 'existing';
     let manualMode = 'existing';
-    const expandedProjects = new Set(); // Tracks open accordions in Projects Overview
+    const expandedProjects = new Set();
 
     function init() {
+      cleanupExpiredTrash();
       const savedTitle = localStorage.getItem(STORAGE_KEY_TITLE) || 'TimeFlow';
       document.getElementById('headerWorkspaceTitle').innerText = savedTitle;
       bindEvents();
@@ -321,9 +357,20 @@
       lucide.createIcons();
     }
 
+    function cleanupExpiredTrash() {
+      const now = Date.now();
+      const maxAgeMs = RETENTION_DAYS * 24 * 60 * 60 * 1000;
+      const initialCount = trash.length;
+      trash = trash.filter(item => (now - item.deletedAt) < maxAgeMs);
+      if (trash.length !== initialCount) {
+        localStorage.setItem(STORAGE_KEY_TRASH, JSON.stringify(trash));
+      }
+    }
+
     function saveState() {
       localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
       localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(activeTimers));
+      localStorage.setItem(STORAGE_KEY_TRASH, JSON.stringify(trash));
       render();
     }
 
@@ -444,6 +491,7 @@
 
       document.getElementById('tabOverview').onclick = () => switchTab('overview');
       document.getElementById('tabLogs').onclick = () => switchTab('logs');
+      document.getElementById('tabTrash').onclick = () => switchTab('trash');
       document.getElementById('searchInput').oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderLists(); };
 
       document.getElementById('btnStartModeExisting').onclick = () => setStartMode('existing');
@@ -474,6 +522,14 @@
 
       const editModal = document.getElementById('editModal');
       document.getElementById('btnCloseEditModal').onclick = () => editModal.classList.add('hidden');
+
+      document.getElementById('btnEmptyTrash').onclick = () => {
+        if (!trash.length) return;
+        if (confirm('Permanently delete all sessions currently in Trash? This cannot be undone.')) {
+          trash = [];
+          saveState();
+        }
+      };
 
       document.getElementById('startTimerForm').onsubmit = (e) => {
         e.preventDefault();
@@ -563,19 +619,29 @@
       currentTab = tab;
       const tOverview = document.getElementById('tabOverview');
       const tLogs = document.getElementById('tabLogs');
+      const tTrash = document.getElementById('tabTrash');
       const vOverview = document.getElementById('overviewView');
       const vLogs = document.getElementById('logsView');
+      const vTrash = document.getElementById('trashView');
+      const searchWrapper = document.getElementById('searchWrapper');
+
+      [tOverview, tLogs, tTrash].forEach(el => {
+        el.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
+      });
+      [vOverview, vLogs, vTrash].forEach(el => el.classList.add('hidden'));
 
       if (tab === 'overview') {
         tOverview.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-xs';
-        tLogs.className = 'px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900';
         vOverview.classList.remove('hidden');
-        vLogs.classList.add('hidden');
-      } else {
+        searchWrapper.classList.remove('hidden');
+      } else if (tab === 'logs') {
         tLogs.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-xs';
-        tOverview.className = 'px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900';
         vLogs.classList.remove('hidden');
-        vOverview.classList.add('hidden');
+        searchWrapper.classList.remove('hidden');
+      } else {
+        tTrash.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-rose-600 shadow-xs flex items-center gap-1.5';
+        vTrash.classList.remove('hidden');
+        searchWrapper.classList.add('hidden');
       }
       renderLists();
     }
@@ -610,9 +676,29 @@
       saveState();
     }
 
-    function deleteSession(id) {
-      if (confirm('Delete this session record?')) {
+    function moveToTrash(id) {
+      const session = sessions.find(s => s.id === id);
+      if (!session) return;
+      if (confirm(`Move "${session.project}" session to Trash? (Will be kept for 30 days)`)) {
         sessions = sessions.filter(s => s.id !== id);
+        trash.unshift({ ...session, deletedAt: Date.now() });
+        saveState();
+      }
+    }
+
+    function restoreFromTrash(id) {
+      const item = trash.find(t => t.id === id);
+      if (!item) return;
+      trash = trash.filter(t => t.id !== id);
+      const restored = { ...item };
+      delete restored.deletedAt;
+      sessions.unshift(restored);
+      saveState();
+    }
+
+    function deletePermanently(id) {
+      if (confirm('Permanently delete this session record? This action cannot be reversed.')) {
+        trash = trash.filter(t => t.id !== id);
         saveState();
       }
     }
@@ -639,16 +725,20 @@
     }
 
     function renderMetrics() {
-      const today = getTodayString();
-      const todayMs = sessions.filter(s => s.date === today).reduce((acc, s) => acc + s.durationMs, 0);
       const totalMs = sessions.reduce((acc, s) => acc + s.durationMs, 0);
       const distinctProjects = new Set([...sessions.map(s => s.project), ...activeTimers.map(t => t.project)]).size;
 
-      document.getElementById('statTodayTime').innerText = formatDuration(todayMs);
       document.getElementById('statActiveTimers').innerText = activeTimers.length;
       document.getElementById('statTotalProjects').innerText = distinctProjects;
-      document.getElementById('statTotalDuration').innerText = formatDuration(totalMs);
       document.getElementById('statTotalEarnings').innerText = calculateEarnings(totalMs);
+
+      const trashBadge = document.getElementById('trashBadge');
+      if (trash.length > 0) {
+        trashBadge.innerText = trash.length;
+        trashBadge.classList.remove('hidden');
+      } else {
+        trashBadge.classList.add('hidden');
+      }
     }
 
     function renderActiveTimers() {
@@ -702,8 +792,8 @@
             <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 mono">${formatDuration(s.durationMs)}</span></td>
             <td class="px-6 py-4 font-bold text-emerald-600 mono">${calculateEarnings(s.durationMs)}</td>
             <td class="px-6 py-4 text-right space-x-2">
-              <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-              <button onclick="deleteSession('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+              <button onclick="moveToTrash('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600" title="Move to Trash"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </td>
           </tr>
         `).join('');
@@ -731,7 +821,6 @@
           const latestRound = p.sessions[0]?.round || 'Round 1';
           const isExpanded = expandedProjects.has(name);
 
-          // Render embedded session history rows inside tile
           const historyHtml = isExpanded ? `
             <div class="mt-4 pt-4 border-t border-slate-100 space-y-2">
               <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Tracked History</p>
@@ -751,8 +840,8 @@
                         <div class="text-[10px] font-semibold text-emerald-600 mono">${calculateEarnings(s.durationMs)}</div>
                       </div>
                       <div class="flex items-center pl-1 border-l border-slate-200">
-                        <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                        <button onclick="deleteSession('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600" title="Edit"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="moveToTrash('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600" title="Move to Trash"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                       </div>
                     </div>
                   </div>
@@ -790,6 +879,39 @@
           `;
         }).join('');
       }
+
+      // Render Trash Table
+      const trashBody = document.getElementById('trashTableBody');
+      const emptyTrash = document.getElementById('emptyTrash');
+      if (!trash.length) {
+        trashBody.innerHTML = '';
+        emptyTrash.classList.remove('hidden');
+      } else {
+        emptyTrash.classList.add('hidden');
+        const now = Date.now();
+        trashBody.innerHTML = trash.map(t => {
+          const daysPassed = Math.floor((now - t.deletedAt) / (24 * 60 * 60 * 1000));
+          const daysLeft = Math.max(0, RETENTION_DAYS - daysPassed);
+          return `
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <td class="px-6 py-4 font-semibold text-slate-800">${t.project}</td>
+              <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700">${t.round || 'Round 1'}</span></td>
+              <td class="px-6 py-4 text-slate-500">${t.date} (${t.startTime} - ${t.finishTime})</td>
+              <td class="px-6 py-4 font-medium mono text-slate-700">${formatDuration(t.durationMs)}</td>
+              <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${daysLeft <= 5 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">${daysLeft}d left</span></td>
+              <td class="px-6 py-4 text-right space-x-2">
+                <button onclick="restoreFromTrash('${t.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg transition-colors inline-flex items-center gap-1">
+                  <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Restore
+                </button>
+                <button onclick="deletePermanently('${t.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-lg transition-colors inline-flex items-center gap-1">
+                  <i data-lucide="trash" class="w-3 h-3"></i> Delete Forever
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
       lucide.createIcons();
     }
 
