@@ -88,7 +88,7 @@
               <i id="earningsEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
             </button>
           </div>
-          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-200/80 text-emerald-800">$90/hr</span>
+          <span id="statHourlyRateBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-200/80 text-emerald-800 mono transition-all">$90/hr</span>
         </div>
         <p id="statTotalEarnings" class="text-2xl font-extrabold text-emerald-700 mono mt-2">$0.00</p>
       </div>
@@ -144,7 +144,7 @@
                 <th class="px-6 py-3.5">Start Time</th>
                 <th class="px-6 py-3.5">Finish Time</th>
                 <th class="px-6 py-3.5">Duration</th>
-                <th class="px-6 py-3.5">Earned ($90/h)</th>
+                <th id="thEarningsHeader" class="px-6 py-3.5">Earned</th>
                 <th class="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
@@ -770,6 +770,18 @@
       document.getElementById('statActiveTimers').innerText = activeTimers.length;
       document.getElementById('statTotalProjects').innerText = distinctProjects;
       document.getElementById('statTotalEarnings').innerText = calculateEarnings(totalMs);
+
+      // Hourly Rate Badge Toggle ($90/hr or •••)
+      const rateBadge = document.getElementById('statHourlyRateBadge');
+      if (rateBadge) {
+        rateBadge.innerText = showEarnings ? '$90/hr' : '•••';
+      }
+
+      // Chronological logs table header
+      const thHeader = document.getElementById('thEarningsHeader');
+      if (thHeader) {
+        thHeader.innerText = showEarnings ? 'Earned ($90/h)' : 'Earned';
+      }
 
       // Update eye icon state
       const eyeIcon = document.getElementById('earningsEyeIcon');
