@@ -52,8 +52,12 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Work Tracker Dashboard</h1>
+      <!-- Editable Dashboard Title -->
+      <div class="flex items-center gap-2.5 group">
+        <h1 id="dashboardMainTitle" class="text-2xl font-bold text-slate-900 tracking-tight cursor-pointer border-b border-dashed border-transparent hover:border-slate-300 transition-colors" title="Click to edit title">Work Tracker Dashboard</h1>
+        <button id="btnEditDashboardTitle" class="text-slate-400 hover:text-indigo-600 transition-colors opacity-0 group-hover:opacity-100 p-1" title="Edit title">
+          <i data-lucide="pencil" class="w-4 h-4"></i>
+        </button>
       </div>
       <div class="flex items-center gap-3">
         <button id="btnOpenManualModal" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 active:bg-slate-100 transition-all">
@@ -334,6 +338,7 @@
     const STORAGE_KEY_ACTIVE = 'tf_active';
     const STORAGE_KEY_TRASH = 'tf_trash';
     const STORAGE_KEY_TITLE = 'tf_title';
+    const STORAGE_KEY_DASH_TITLE = 'tf_dash_title';
     const HOURLY_RATE = 90; // $90/hr
     const RETENTION_DAYS = 30;
 
@@ -350,6 +355,10 @@
       cleanupExpiredTrash();
       const savedTitle = localStorage.getItem(STORAGE_KEY_TITLE) || 'TimeFlow';
       document.getElementById('headerWorkspaceTitle').innerText = savedTitle;
+      
+      const savedDashTitle = localStorage.getItem(STORAGE_KEY_DASH_TITLE) || 'Work Tracker Dashboard';
+      document.getElementById('dashboardMainTitle').innerText = savedDashTitle;
+
       bindEvents();
       render();
       setInterval(tickActiveTimers, 1000);
@@ -475,6 +484,7 @@
     }
 
     function bindEvents() {
+      // Header Workspace Title Edit
       const headerTitle = document.getElementById('headerWorkspaceTitle');
       const btnEditTitle = document.getElementById('btnEditWorkspaceTitle');
       const editTitleAction = () => {
@@ -487,6 +497,20 @@
       };
       headerTitle.addEventListener('click', editTitleAction);
       btnEditTitle.addEventListener('click', editTitleAction);
+
+      // Dashboard Main Title Edit
+      const dashTitle = document.getElementById('dashboardMainTitle');
+      const btnEditDash = document.getElementById('btnEditDashboardTitle');
+      const editDashTitleAction = () => {
+        const current = dashTitle.innerText;
+        const newTitle = prompt('Enter Dashboard Title:', current);
+        if (newTitle && newTitle.trim()) {
+          dashTitle.innerText = newTitle.trim();
+          localStorage.setItem(STORAGE_KEY_DASH_TITLE, newTitle.trim());
+        }
+      };
+      dashTitle.addEventListener('click', editDashTitleAction);
+      btnEditDash.addEventListener('click', editDashTitleAction);
 
       document.getElementById('tabOverview').onclick = () => switchTab('overview');
       document.getElementById('tabLogs').onclick = () => switchTab('logs');
