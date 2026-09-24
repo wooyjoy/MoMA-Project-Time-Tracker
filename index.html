@@ -54,7 +54,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
       <div>
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Work Tracker Dashboard</h1>
-        <p class="text-sm text-slate-500 mt-1">Track live timers or log past working sessions by project.</p>
+        <p class="text-sm text-slate-500 mt-1">Track work time per round and calculate earnings at <span class="font-bold text-emerald-600">$90/hr</span>.</p>
       </div>
       <div class="flex items-center gap-3">
         <button id="btnOpenManualModal" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 active:bg-slate-100 transition-all">
@@ -66,7 +66,8 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- 5 Metrics Cards (Including $90/hr Rate Earnings) -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Today's Tracked</p>
         <p id="statTodayTime" class="text-2xl font-extrabold text-slate-900 mono mt-2">0h 0m</p>
@@ -83,8 +84,16 @@
         <p class="text-xs font-bold uppercase tracking-wider text-slate-400">All-Time Work</p>
         <p id="statTotalDuration" class="text-2xl font-extrabold text-slate-900 mono mt-2">0h 0m</p>
       </div>
+      <div class="bg-emerald-50/60 p-5 rounded-2xl border border-emerald-200 shadow-xs col-span-2 md:col-span-1">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Estimated Earnings</p>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-200/80 text-emerald-800">$90/hr</span>
+        </div>
+        <p id="statTotalEarnings" class="text-2xl font-extrabold text-emerald-700 mono mt-2">$0.00</p>
+      </div>
     </div>
 
+    <!-- Active Live Timers Container -->
     <section id="activeTimersContainer" class="hidden space-y-4">
       <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Tracking Sessions
@@ -92,6 +101,7 @@
       <div id="activeTimersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
+    <!-- Table & Grid Section -->
     <section class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
       <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-2 p-1 bg-slate-100/80 rounded-xl max-w-fit">
@@ -100,9 +110,10 @@
         </div>
         <div class="relative w-full sm:w-64">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-          <input id="searchInput" type="text" placeholder="Search projects..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+          <input id="searchInput" type="text" placeholder="Search projects or rounds..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
         </div>
       </div>
+
       <div id="overviewView" class="p-6">
         <div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         <div id="emptyOverview" class="hidden py-16 text-center">
@@ -113,16 +124,19 @@
           <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Click Track Time or Add Past Entry to start recording your work hours.</p>
         </div>
       </div>
+
       <div id="logsView" class="hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-600">
             <thead class="bg-slate-50/75 border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
               <tr>
                 <th class="px-6 py-3.5">Project</th>
+                <th class="px-6 py-3.5">Round</th>
                 <th class="px-6 py-3.5">Date</th>
                 <th class="px-6 py-3.5">Start Time</th>
                 <th class="px-6 py-3.5">Finish Time</th>
                 <th class="px-6 py-3.5">Duration</th>
+                <th class="px-6 py-3.5">Earned ($90/h)</th>
                 <th class="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
@@ -136,17 +150,46 @@
     </section>
   </main>
 
+  <!-- Track Time Modal -->
   <div id="startModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-slate-900">Start Tracking</h3>
+        <h3 class="text-base font-bold text-slate-900">Track Working Time</h3>
         <button id="btnCloseStartModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
+
+      <!-- Mode Selector: Existing vs New -->
+      <div class="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600">
+        <button type="button" id="btnStartModeExisting" class="flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all">Existing Project</button>
+        <button type="button" id="btnStartModeNew" class="flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">+ New Project</button>
+      </div>
+
       <form id="startTimerForm" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Project Name</label>
-          <input id="startProjectInput" type="text" required placeholder="e.g., Brand Campaign Animation" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        <!-- Existing Project Dropdown -->
+        <div id="startExistingContainer">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Choose Existing Project</label>
+          <select id="startExistingSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+          </select>
         </div>
+
+        <!-- New Project Input -->
+        <div id="startNewContainer" class="hidden">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">New Project Name</label>
+          <input id="startProjectInput" type="text" placeholder="e.g., Global Brand Identity" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <!-- Round Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
+          <select id="startRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+            <option value="Round 1" selected>Round 1</option>
+            <option value="Round 2">Round 2</option>
+            <option value="Round 3">Round 3</option>
+            <option value="Round 4">Round 4</option>
+            <option value="Round 5">Round 5</option>
+          </select>
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
@@ -157,22 +200,51 @@
             <input id="startTimeInput" type="time" step="1" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300">
           </div>
         </div>
-        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all">Start Timer</button>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all">Start Tracking</button>
       </form>
     </div>
   </div>
 
+  <!-- Manual Entry Modal -->
   <div id="manualModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-bold text-slate-900">Add Past Session</h3>
         <button id="btnCloseManualModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
+
+      <!-- Mode Selector: Existing vs New -->
+      <div class="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-semibold text-slate-600">
+        <button type="button" id="btnManualModeExisting" class="flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all">Existing Project</button>
+        <button type="button" id="btnManualModeNew" class="flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">+ New Project</button>
+      </div>
+
       <form id="manualSessionForm" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Project Name</label>
-          <input id="manualProjectInput" type="text" required placeholder="e.g., 3D Lookdev" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+        <!-- Existing Project Dropdown -->
+        <div id="manualExistingContainer">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Choose Existing Project</label>
+          <select id="manualExistingSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+          </select>
         </div>
+
+        <!-- New Project Input -->
+        <div id="manualNewContainer" class="hidden">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">New Project Name</label>
+          <input id="manualProjectInput" type="text" placeholder="e.g., UI Animation" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <!-- Round Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
+          <select id="manualRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+            <option value="Round 1" selected>Round 1</option>
+            <option value="Round 2">Round 2</option>
+            <option value="Round 3">Round 3</option>
+            <option value="Round 4">Round 4</option>
+            <option value="Round 5">Round 5</option>
+          </select>
+        </div>
+
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
           <input id="manualDateInput" type="date" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300">
@@ -192,6 +264,7 @@
     </div>
   </div>
 
+  <!-- Edit Modal -->
   <div id="editModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
@@ -203,6 +276,16 @@
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Project Name</label>
           <input id="editProjectInput" type="text" required class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
+          <select id="editRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+            <option value="Round 1">Round 1</option>
+            <option value="Round 2">Round 2</option>
+            <option value="Round 3">Round 3</option>
+            <option value="Round 4">Round 4</option>
+            <option value="Round 5">Round 5</option>
+          </select>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
@@ -227,11 +310,14 @@
     const STORAGE_KEY_SESSIONS = 'tf_sessions';
     const STORAGE_KEY_ACTIVE = 'tf_active';
     const STORAGE_KEY_TITLE = 'tf_title';
+    const HOURLY_RATE = 90; // $90/hr
 
     let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]');
     let activeTimers = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVE) || '[]');
     let currentTab = 'overview';
     let searchQuery = '';
+    let startMode = 'existing';
+    let manualMode = 'existing';
 
     function init() {
       const savedTitle = localStorage.getItem(STORAGE_KEY_TITLE) || 'TimeFlow';
@@ -256,6 +342,12 @@
       return `${hours}h ${minutes}m`;
     }
 
+    function calculateEarnings(ms) {
+      if (ms < 0) ms = 0;
+      const hours = ms / (1000 * 60 * 60);
+      return `$${(hours * HOURLY_RATE).toFixed(2)}`;
+    }
+
     function formatTimerDisplay(ms) {
       if (ms < 0) ms = 0;
       const totalSec = Math.floor(ms / 1000);
@@ -273,6 +365,74 @@
     function getTimeString() {
       const d = new Date();
       return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    }
+
+    function getUniqueProjects() {
+      const set = new Set([...sessions.map(s => s.project), ...activeTimers.map(t => t.project)]);
+      return Array.from(set).filter(Boolean);
+    }
+
+    function populateProjectDropdowns() {
+      const projects = getUniqueProjects();
+      const startSelect = document.getElementById('startExistingSelect');
+      const manualSelect = document.getElementById('manualExistingSelect');
+
+      if (!projects.length) {
+        startSelect.innerHTML = '<option value="">No existing projects yet</option>';
+        manualSelect.innerHTML = '<option value="">No existing projects yet</option>';
+        setStartMode('new');
+        setManualMode('new');
+      } else {
+        const optionsHtml = projects.map(p => `<option value="${p}">${p}</option>`).join('');
+        startSelect.innerHTML = optionsHtml;
+        manualSelect.innerHTML = optionsHtml;
+      }
+    }
+
+    function setStartMode(mode) {
+      startMode = mode;
+      const btnEx = document.getElementById('btnStartModeExisting');
+      const btnNew = document.getElementById('btnStartModeNew');
+      const boxEx = document.getElementById('startExistingContainer');
+      const boxNew = document.getElementById('startNewContainer');
+
+      if (mode === 'existing') {
+        btnEx.className = 'flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all';
+        btnNew.className = 'flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        boxEx.classList.remove('hidden');
+        boxNew.classList.add('hidden');
+        document.getElementById('startProjectInput').required = false;
+      } else {
+        btnNew.className = 'flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all';
+        btnEx.className = 'flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        boxNew.classList.remove('hidden');
+        boxEx.classList.add('hidden');
+        document.getElementById('startProjectInput').required = true;
+        document.getElementById('startProjectInput').focus();
+      }
+    }
+
+    function setManualMode(mode) {
+      manualMode = mode;
+      const btnEx = document.getElementById('btnManualModeExisting');
+      const btnNew = document.getElementById('btnManualModeNew');
+      const boxEx = document.getElementById('manualExistingContainer');
+      const boxNew = document.getElementById('manualNewContainer');
+
+      if (mode === 'existing') {
+        btnEx.className = 'flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all';
+        btnNew.className = 'flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        boxEx.classList.remove('hidden');
+        boxNew.classList.add('hidden');
+        document.getElementById('manualProjectInput').required = false;
+      } else {
+        btnNew.className = 'flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all';
+        btnEx.className = 'flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all';
+        boxNew.classList.remove('hidden');
+        boxEx.classList.add('hidden');
+        document.getElementById('manualProjectInput').required = true;
+        document.getElementById('manualProjectInput').focus();
+      }
     }
 
     function bindEvents() {
@@ -293,20 +453,30 @@
       document.getElementById('tabLogs').onclick = () => switchTab('logs');
       document.getElementById('searchInput').oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderLists(); };
 
+      // Modal Mode Toggles
+      document.getElementById('btnStartModeExisting').onclick = () => setStartMode('existing');
+      document.getElementById('btnStartModeNew').onclick = () => setStartMode('new');
+      document.getElementById('btnManualModeExisting').onclick = () => setManualMode('existing');
+      document.getElementById('btnManualModeNew').onclick = () => setManualMode('new');
+
       const startModal = document.getElementById('startModal');
       document.getElementById('btnOpenStartModal').onclick = () => {
+        populateProjectDropdowns();
+        const hasProjects = getUniqueProjects().length > 0;
+        setStartMode(hasProjects ? 'existing' : 'new');
         document.getElementById('startDateInput').value = getTodayString();
         document.getElementById('startTimeInput').value = getTimeString();
         startModal.classList.remove('hidden');
-        document.getElementById('startProjectInput').focus();
       };
       document.getElementById('btnCloseStartModal').onclick = () => startModal.classList.add('hidden');
 
       const manualModal = document.getElementById('manualModal');
       document.getElementById('btnOpenManualModal').onclick = () => {
+        populateProjectDropdowns();
+        const hasProjects = getUniqueProjects().length > 0;
+        setManualMode(hasProjects ? 'existing' : 'new');
         document.getElementById('manualDateInput').value = getTodayString();
         manualModal.classList.remove('hidden');
-        document.getElementById('manualProjectInput').focus();
       };
       document.getElementById('btnCloseManualModal').onclick = () => manualModal.classList.add('hidden');
 
@@ -315,11 +485,26 @@
 
       document.getElementById('startTimerForm').onsubmit = (e) => {
         e.preventDefault();
-        const name = document.getElementById('startProjectInput').value.trim();
+        let name = '';
+        if (startMode === 'existing') {
+          name = document.getElementById('startExistingSelect').value;
+          if (!name) { alert('Please create or enter a project name first.'); return; }
+        } else {
+          name = document.getElementById('startProjectInput').value.trim();
+        }
+        const round = document.getElementById('startRoundSelect').value || 'Round 1';
         const date = document.getElementById('startDateInput').value;
         const time = document.getElementById('startTimeInput').value;
         const startTimestamp = new Date(`${date}T${time}`).getTime() || Date.now();
-        activeTimers.push({ id: 'act_' + Date.now(), project: name, date, startTime: time, startTimestamp });
+
+        activeTimers.push({
+          id: 'act_' + Date.now(),
+          project: name,
+          round: round,
+          date,
+          startTime: time,
+          startTimestamp
+        });
         saveState();
         e.target.reset();
         startModal.classList.add('hidden');
@@ -327,14 +512,30 @@
 
       document.getElementById('manualSessionForm').onsubmit = (e) => {
         e.preventDefault();
-        const name = document.getElementById('manualProjectInput').value.trim();
+        let name = '';
+        if (manualMode === 'existing') {
+          name = document.getElementById('manualExistingSelect').value;
+          if (!name) { alert('Please create or enter a project name first.'); return; }
+        } else {
+          name = document.getElementById('manualProjectInput').value.trim();
+        }
+        const round = document.getElementById('manualRoundSelect').value || 'Round 1';
         const date = document.getElementById('manualDateInput').value;
         const start = document.getElementById('manualStartInput').value;
         const end = document.getElementById('manualEndInput').value;
         const startMs = new Date(`${date}T${start}`).getTime();
         const endMs = new Date(`${date}T${end}`).getTime();
         const durationMs = Math.max(0, endMs - startMs);
-        sessions.unshift({ id: 'sess_' + Date.now(), project: name, date, startTime: start, finishTime: end, durationMs });
+
+        sessions.unshift({
+          id: 'sess_' + Date.now(),
+          project: name,
+          round: round,
+          date,
+          startTime: start,
+          finishTime: end,
+          durationMs
+        });
         saveState();
         e.target.reset();
         manualModal.classList.add('hidden');
@@ -344,6 +545,7 @@
         e.preventDefault();
         const id = document.getElementById('editSessionId').value;
         const name = document.getElementById('editProjectInput').value.trim();
+        const round = document.getElementById('editRoundSelect').value;
         const date = document.getElementById('editDateInput').value;
         const start = document.getElementById('editStartInput').value;
         const end = document.getElementById('editEndInput').value;
@@ -352,6 +554,7 @@
         const session = sessions.find(s => s.id === id);
         if (session) {
           session.project = name;
+          session.round = round;
           session.date = date;
           session.startTime = start;
           session.finishTime = end;
@@ -405,6 +608,7 @@
       sessions.unshift({
         id: 'sess_' + Date.now(),
         project: timer.project,
+        round: timer.round || 'Round 1',
         date: timer.date,
         startTime: timer.startTime,
         finishTime,
@@ -426,6 +630,7 @@
       if (!s) return;
       document.getElementById('editSessionId').value = s.id;
       document.getElementById('editProjectInput').value = s.project;
+      document.getElementById('editRoundSelect').value = s.round || 'Round 1';
       document.getElementById('editDateInput').value = s.date;
       document.getElementById('editStartInput').value = s.startTime;
       document.getElementById('editEndInput').value = s.finishTime;
@@ -442,6 +647,7 @@
       document.getElementById('statActiveTimers').innerText = activeTimers.length;
       document.getElementById('statTotalProjects').innerText = distinctProjects;
       document.getElementById('statTotalDuration').innerText = formatDuration(totalMs);
+      document.getElementById('statTotalEarnings').innerText = calculateEarnings(totalMs);
     }
 
     function renderActiveTimers() {
@@ -458,10 +664,10 @@
           <div>
             <div class="flex items-center justify-between">
               <span class="text-xs uppercase font-bold text-indigo-300">Live Session</span>
-              <span class="text-xs text-indigo-200">${t.date}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-800 text-indigo-200 font-semibold">${t.round || 'Round 1'}</span>
             </div>
             <h4 class="text-lg font-bold mt-1 truncate">${t.project}</h4>
-            <div class="text-xs text-indigo-200 mt-1">Started at ${t.startTime}</div>
+            <div class="text-xs text-indigo-200 mt-1">Started at ${t.startTime} (${t.date})</div>
           </div>
           <div class="mt-6 flex items-baseline justify-between pt-4 border-t border-indigo-800">
             <span id="timerDisplay_${t.id}" class="text-2xl font-extrabold mono">${formatTimerDisplay(Date.now() - t.startTimestamp)}</span>
@@ -472,7 +678,11 @@
     }
 
     function renderLists() {
-      const filteredSessions = sessions.filter(s => s.project.toLowerCase().includes(searchQuery));
+      const q = searchQuery.toLowerCase();
+      const filteredSessions = sessions.filter(s => 
+        s.project.toLowerCase().includes(q) || 
+        (s.round && s.round.toLowerCase().includes(q))
+      );
       const tbody = document.getElementById('logsTableBody');
       const emptyLogs = document.getElementById('emptyLogs');
 
@@ -484,10 +694,12 @@
         tbody.innerHTML = filteredSessions.map(s => `
           <tr class="hover:bg-slate-50/80 transition-colors">
             <td class="px-6 py-4 font-semibold text-slate-800">${s.project}</td>
+            <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700">${s.round || 'Round 1'}</span></td>
             <td class="px-6 py-4 text-slate-500">${s.date}</td>
             <td class="px-6 py-4 mono text-slate-500">${s.startTime}</td>
             <td class="px-6 py-4 mono text-slate-500">${s.finishTime}</td>
             <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 mono">${formatDuration(s.durationMs)}</span></td>
+            <td class="px-6 py-4 font-bold text-emerald-600 mono">${calculateEarnings(s.durationMs)}</td>
             <td class="px-6 py-4 text-right space-x-2">
               <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600"><i data-lucide="pencil" class="w-4 h-4"></i></button>
               <button onclick="deleteSession('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -506,7 +718,7 @@
         grouped[s.project].sessions.push(s);
       });
 
-      const projectNames = Object.keys(grouped).filter(name => name.toLowerCase().includes(searchQuery));
+      const projectNames = Object.keys(grouped).filter(name => name.toLowerCase().includes(q));
 
       if (!projectNames.length) {
         projectsGrid.innerHTML = '';
@@ -515,16 +727,23 @@
         emptyOverview.classList.add('hidden');
         projectsGrid.innerHTML = projectNames.map(name => {
           const p = grouped[name];
+          const latestRound = p.sessions[0]?.round || 'Round 1';
           return `
             <div class="p-5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between">
               <div>
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">${p.sessions.length} sessions</span>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">${p.sessions.length} sessions</span>
+                  <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">Latest: ${latestRound}</span>
+                </div>
                 <h3 class="text-base font-bold text-slate-900 mt-1 truncate">${name}</h3>
-                <p class="text-xl font-extrabold text-indigo-600 mono mt-2">${formatDuration(p.totalMs)}</p>
+                <div class="flex items-baseline justify-between mt-3">
+                  <p class="text-xl font-extrabold text-indigo-600 mono">${formatDuration(p.totalMs)}</p>
+                  <p class="text-sm font-bold text-emerald-600 mono">${calculateEarnings(p.totalMs)}</p>
+                </div>
               </div>
               <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
                 <button onclick="startQuickTimer('${name}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-                  <i data-lucide="play" class="w-3.5 h-3.5 fill-indigo-600"></i> Track Again
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-indigo-600"></i> Track Again (Next Round)
                 </button>
               </div>
             </div>
@@ -535,9 +754,19 @@
     }
 
     function startQuickTimer(name) {
+      // Find latest round used for this project and increment if possible
+      const prevSessions = sessions.filter(s => s.project === name);
+      let nextRound = 'Round 1';
+      if (prevSessions.length > 0) {
+        const lastRound = prevSessions[0].round || 'Round 1';
+        const roundNum = parseInt(lastRound.replace('Round ', ''), 10) || 1;
+        nextRound = roundNum < 5 ? `Round ${roundNum + 1}` : 'Round 5';
+      }
+
       activeTimers.push({
         id: 'act_' + Date.now(),
         project: name,
+        round: nextRound,
         date: getTodayString(),
         startTime: getTimeString(),
         startTimestamp: Date.now()
@@ -547,9 +776,10 @@
 
     function exportCsv() {
       if (!sessions.length) { alert('No sessions to export.'); return; }
-      let csv = 'Project,Date,Start Time,Finish Time,Duration (Hours:Minutes),Duration (ms)\n';
+      let csv = 'Project,Round,Date,Start Time,Finish Time,Duration (Formatted),Duration (ms),Rate ($/hr),Earned ($)\n';
       sessions.forEach(s => {
-        csv += `"${s.project}","${s.date}","${s.startTime}","${s.finishTime}","${formatDuration(s.durationMs)}",${s.durationMs}\n`;
+        const earned = ((s.durationMs / 3600000) * HOURLY_RATE).toFixed(2);
+        csv += `"${s.project}","${s.round || 'Round 1'}","${s.date}","${s.startTime}","${s.finishTime}","${formatDuration(s.durationMs)}",${s.durationMs},${HOURLY_RATE},"${earned}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
