@@ -217,14 +217,15 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
-          <select id="startRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
-            <option value="Round 1" selected>Round 1</option>
-            <option value="Round 2">Round 2</option>
-            <option value="Round 3">Round 3</option>
-            <option value="Round 4">Round 4</option>
-            <option value="Round 5">Round 5</option>
-          </select>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round (Unlimited)</label>
+          <div class="flex items-center rounded-xl border border-slate-300 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+            <span class="px-3.5 py-2.5 text-sm font-semibold text-slate-500 bg-slate-50 border-r border-slate-200 select-none">Round</span>
+            <input id="startRoundInput" type="number" min="1" step="1" value="1" required class="w-full px-3.5 py-2.5 text-sm font-bold mono text-slate-900 focus:outline-hidden">
+            <div class="flex items-center pr-1.5 gap-1">
+              <button type="button" onclick="stepRoundInput('startRoundInput', -1)" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors" title="Decrease round"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
+              <button type="button" onclick="stepRoundInput('startRoundInput', 1)" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors" title="Increase round"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -268,14 +269,15 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
-          <select id="manualRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
-            <option value="Round 1" selected>Round 1</option>
-            <option value="Round 2">Round 2</option>
-            <option value="Round 3">Round 3</option>
-            <option value="Round 4">Round 4</option>
-            <option value="Round 5">Round 5</option>
-          </select>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round (Unlimited)</label>
+          <div class="flex items-center rounded-xl border border-slate-300 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+            <span class="px-3.5 py-2.5 text-sm font-semibold text-slate-500 bg-slate-50 border-r border-slate-200 select-none">Round</span>
+            <input id="manualRoundInput" type="number" min="1" step="1" value="1" required class="w-full px-3.5 py-2.5 text-sm font-bold mono text-slate-900 focus:outline-hidden">
+            <div class="flex items-center pr-1.5 gap-1">
+              <button type="button" onclick="stepRoundInput('manualRoundInput', -1)" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors" title="Decrease round"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
+              <button type="button" onclick="stepRoundInput('manualRoundInput', 1)" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors" title="Increase round"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -297,7 +299,7 @@
     </div>
   </div>
 
-  <!-- Edit Modal -->
+  <!-- Edit Session Modal -->
   <div id="editModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
@@ -311,14 +313,15 @@
           <input id="editProjectInput" type="text" required class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round</label>
-          <select id="editRoundSelect" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
-            <option value="Round 1">Round 1</option>
-            <option value="Round 2">Round 2</option>
-            <option value="Round 3">Round 3</option>
-            <option value="Round 4">Round 4</option>
-            <option value="Round 5">Round 5</option>
-          </select>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Iteration / Round (Unlimited)</label>
+          <div class="flex items-center rounded-xl border border-slate-300 bg-white overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500">
+            <span class="px-3.5 py-2.5 text-sm font-semibold text-slate-500 bg-slate-50 border-r border-slate-200 select-none">Round</span>
+            <input id="editRoundInput" type="number" min="1" step="1" value="1" required class="w-full px-3.5 py-2.5 text-sm font-bold mono text-slate-900 focus:outline-hidden">
+            <div class="flex items-center pr-1.5 gap-1">
+              <button type="button" onclick="stepRoundInput('editRoundInput', -1)" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors" title="Decrease round"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
+              <button type="button" onclick="stepRoundInput('editRoundInput', 1)" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors" title="Increase round"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Date</label>
@@ -339,6 +342,55 @@
     </div>
   </div>
 
+  <!-- Rename Project Modal (Works for Active/Started Timers & Overview Projects) -->
+  <div id="renameProjectModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">Edit Project Title</h3>
+        <button id="btnCloseRenameModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="renameProjectForm" class="space-y-4">
+        <input type="hidden" id="renameOldProjectName">
+        <input type="hidden" id="renameTimerId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Project Title</label>
+          <input id="renameProjectInput" type="text" required placeholder="Enter new project title" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <p class="text-xs text-slate-500">All active timers and logged sessions for this project will be updated with the new title.</p>
+        <div class="flex items-center justify-end gap-2 pt-1">
+          <button type="button" id="btnCancelRenameModal" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-all">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-md transition-all">Save Title</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Password Protection Modal for Deletion -->
+  <div id="passwordModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Password Required</h3>
+        </div>
+        <button id="btnClosePasswordModal" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p id="passwordModalDesc" class="text-xs text-slate-600 leading-relaxed">Please enter the password to confirm deletion.</p>
+      <form id="passwordForm" class="space-y-3">
+        <div>
+          <input id="deletePasswordInput" type="password" inputmode="numeric" placeholder="Enter password" required class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 mono tracking-widest focus:outline-hidden focus:ring-2 focus:ring-rose-500">
+          <p id="passwordErrorMsg" class="hidden text-xs font-semibold text-rose-600 mt-1.5">Incorrect password. Please try again.</p>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" id="btnCancelPasswordModal" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-all">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl shadow-md transition-all">Confirm Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY_SESSIONS = 'tf_sessions';
     const STORAGE_KEY_ACTIVE = 'tf_active';
@@ -348,6 +400,7 @@
     const STORAGE_KEY_SHOW_EARNINGS = 'tf_show_earnings';
     const HOURLY_RATE = 90; // $90/hr
     const RETENTION_DAYS = 30;
+    const DELETE_PASSWORD = '1006';
 
     let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]');
     let activeTimers = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVE) || '[]');
@@ -357,6 +410,7 @@
     let searchQuery = '';
     let startMode = 'existing';
     let manualMode = 'existing';
+    let pendingDeleteCallback = null;
     const expandedProjects = new Set();
 
     function init() {
@@ -388,6 +442,33 @@
       localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(activeTimers));
       localStorage.setItem(STORAGE_KEY_TRASH, JSON.stringify(trash));
       render();
+    }
+
+    function parseRoundNumber(roundStr) {
+      if (!roundStr) return 1;
+      const match = String(roundStr).match(/(\d+)/);
+      return match ? Math.max(1, parseInt(match[1], 10)) : 1;
+    }
+
+    function getNextRoundNumberForProject(projectName) {
+      if (!projectName) return 1;
+      const matchingSessions = sessions.filter(s => s.project === projectName);
+      const matchingActive = activeTimers.filter(t => t.project === projectName);
+      const all = [...matchingSessions, ...matchingActive];
+      if (!all.length) return 1;
+      let maxRound = 0;
+      all.forEach(item => {
+        const r = parseRoundNumber(item.round);
+        if (r > maxRound) maxRound = r;
+      });
+      return maxRound + 1;
+    }
+
+    function stepRoundInput(inputId, delta) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const current = parseInt(input.value, 10) || 1;
+      input.value = Math.max(1, current + delta);
     }
 
     function formatDuration(ms) {
@@ -429,6 +510,15 @@
       return Array.from(set).filter(Boolean);
     }
 
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function populateProjectDropdowns() {
       const projects = getUniqueProjects();
       const startSelect = document.getElementById('startExistingSelect');
@@ -440,7 +530,7 @@
         setStartMode('new');
         setManualMode('new');
       } else {
-        const optionsHtml = projects.map(p => `<option value="${p}">${p}</option>`).join('');
+        const optionsHtml = projects.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
         startSelect.innerHTML = optionsHtml;
         manualSelect.innerHTML = optionsHtml;
       }
@@ -459,12 +549,15 @@
         boxEx.classList.remove('hidden');
         boxNew.classList.add('hidden');
         document.getElementById('startProjectInput').required = false;
+        const selected = document.getElementById('startExistingSelect').value;
+        document.getElementById('startRoundInput').value = getNextRoundNumberForProject(selected);
       } else {
         btnNew.className = 'flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all';
         btnEx.className = 'flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all';
         boxNew.classList.remove('hidden');
         boxEx.classList.add('hidden');
         document.getElementById('startProjectInput').required = true;
+        document.getElementById('startRoundInput').value = 1;
         document.getElementById('startProjectInput').focus();
       }
     }
@@ -482,14 +575,50 @@
         boxEx.classList.remove('hidden');
         boxNew.classList.add('hidden');
         document.getElementById('manualProjectInput').required = false;
+        const selected = document.getElementById('manualExistingSelect').value;
+        document.getElementById('manualRoundInput').value = getNextRoundNumberForProject(selected);
       } else {
         btnNew.className = 'flex-1 py-1.5 rounded-lg bg-white text-indigo-600 shadow-xs transition-all';
         btnEx.className = 'flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all';
         boxNew.classList.remove('hidden');
         boxEx.classList.add('hidden');
         document.getElementById('manualProjectInput').required = true;
+        document.getElementById('manualRoundInput').value = 1;
         document.getElementById('manualProjectInput').focus();
       }
+    }
+
+    function openRenameProjectModal(encodedProjectName, timerId = '') {
+      const projectName = decodeURIComponent(encodedProjectName);
+      document.getElementById('renameOldProjectName').value = projectName;
+      document.getElementById('renameTimerId').value = timerId;
+      const input = document.getElementById('renameProjectInput');
+      input.value = projectName;
+      document.getElementById('renameProjectModal').classList.remove('hidden');
+      setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 20);
+    }
+
+    function closeRenameProjectModal() {
+      document.getElementById('renameProjectModal').classList.add('hidden');
+    }
+
+    function requestPasswordForDelete(description, callback) {
+      pendingDeleteCallback = callback;
+      document.getElementById('passwordModalDesc').innerText = description;
+      const input = document.getElementById('deletePasswordInput');
+      const err = document.getElementById('passwordErrorMsg');
+      input.value = '';
+      err.classList.add('hidden');
+      document.getElementById('passwordModal').classList.remove('hidden');
+      setTimeout(() => input.focus(), 20);
+    }
+
+    function closePasswordModal() {
+      pendingDeleteCallback = null;
+      document.getElementById('passwordModal').classList.add('hidden');
     }
 
     function bindEvents() {
@@ -531,489 +660,4 @@
       document.getElementById('tabOverview').onclick = () => switchTab('overview');
       document.getElementById('tabLogs').onclick = () => switchTab('logs');
       document.getElementById('tabTrash').onclick = () => switchTab('trash');
-      document.getElementById('searchInput').oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderLists(); };
-
-      document.getElementById('btnStartModeExisting').onclick = () => setStartMode('existing');
-      document.getElementById('btnStartModeNew').onclick = () => setStartMode('new');
-      document.getElementById('btnManualModeExisting').onclick = () => setManualMode('existing');
-      document.getElementById('btnManualModeNew').onclick = () => setManualMode('new');
-
-      const startModal = document.getElementById('startModal');
-      document.getElementById('btnOpenStartModal').onclick = () => {
-        populateProjectDropdowns();
-        const hasProjects = getUniqueProjects().length > 0;
-        setStartMode(hasProjects ? 'existing' : 'new');
-        document.getElementById('startDateInput').value = getTodayString();
-        document.getElementById('startTimeInput').value = getTimeString();
-        startModal.classList.remove('hidden');
-      };
-      document.getElementById('btnCloseStartModal').onclick = () => startModal.classList.add('hidden');
-
-      const manualModal = document.getElementById('manualModal');
-      document.getElementById('btnOpenManualModal').onclick = () => {
-        populateProjectDropdowns();
-        const hasProjects = getUniqueProjects().length > 0;
-        setManualMode(hasProjects ? 'existing' : 'new');
-        document.getElementById('manualDateInput').value = getTodayString();
-        manualModal.classList.remove('hidden');
-      };
-      document.getElementById('btnCloseManualModal').onclick = () => manualModal.classList.add('hidden');
-
-      const editModal = document.getElementById('editModal');
-      document.getElementById('btnCloseEditModal').onclick = () => editModal.classList.add('hidden');
-
-      document.getElementById('btnEmptyTrash').onclick = () => {
-        if (!trash.length) return;
-        if (confirm('Permanently delete all sessions currently in Trash? This cannot be undone.')) {
-          trash = [];
-          saveState();
-        }
-      };
-
-      document.getElementById('startTimerForm').onsubmit = (e) => {
-        e.preventDefault();
-        let name = '';
-        if (startMode === 'existing') {
-          name = document.getElementById('startExistingSelect').value;
-          if (!name) { alert('Please create or enter a project name first.'); return; }
-        } else {
-          name = document.getElementById('startProjectInput').value.trim();
-        }
-        const round = document.getElementById('startRoundSelect').value || 'Round 1';
-        const date = document.getElementById('startDateInput').value;
-        const time = document.getElementById('startTimeInput').value;
-        const startTimestamp = new Date(`${date}T${time}`).getTime() || Date.now();
-
-        activeTimers.push({
-          id: 'act_' + Date.now(),
-          project: name,
-          round: round,
-          date,
-          startTime: time,
-          startTimestamp
-        });
-        saveState();
-        e.target.reset();
-        startModal.classList.add('hidden');
-      };
-
-      document.getElementById('manualSessionForm').onsubmit = (e) => {
-        e.preventDefault();
-        let name = '';
-        if (manualMode === 'existing') {
-          name = document.getElementById('manualExistingSelect').value;
-          if (!name) { alert('Please create or enter a project name first.'); return; }
-        } else {
-          name = document.getElementById('manualProjectInput').value.trim();
-        }
-        const round = document.getElementById('manualRoundSelect').value || 'Round 1';
-        const date = document.getElementById('manualDateInput').value;
-        const start = document.getElementById('manualStartInput').value;
-        const end = document.getElementById('manualEndInput').value;
-        const startMs = new Date(`${date}T${start}`).getTime();
-        const endMs = new Date(`${date}T${end}`).getTime();
-        const durationMs = Math.max(0, endMs - startMs);
-
-        sessions.unshift({
-          id: 'sess_' + Date.now(),
-          project: name,
-          round: round,
-          date,
-          startTime: start,
-          finishTime: end,
-          durationMs
-        });
-        saveState();
-        e.target.reset();
-        manualModal.classList.add('hidden');
-      };
-
-      document.getElementById('editSessionForm').onsubmit = (e) => {
-        e.preventDefault();
-        const id = document.getElementById('editSessionId').value;
-        const name = document.getElementById('editProjectInput').value.trim();
-        const round = document.getElementById('editRoundSelect').value;
-        const date = document.getElementById('editDateInput').value;
-        const start = document.getElementById('editStartInput').value;
-        const end = document.getElementById('editEndInput').value;
-        const startMs = new Date(`${date}T${start}`).getTime();
-        const endMs = new Date(`${date}T${end}`).getTime();
-        const session = sessions.find(s => s.id === id);
-        if (session) {
-          session.project = name;
-          session.round = round;
-          session.date = date;
-          session.startTime = start;
-          session.finishTime = end;
-          session.durationMs = Math.max(0, endMs - startMs);
-          saveState();
-        }
-        editModal.classList.add('hidden');
-      };
-
-      document.getElementById('btnExportCsv').onclick = exportCsv;
-    }
-
-    function switchTab(tab) {
-      currentTab = tab;
-      const tOverview = document.getElementById('tabOverview');
-      const tLogs = document.getElementById('tabLogs');
-      const tTrash = document.getElementById('tabTrash');
-      const vOverview = document.getElementById('overviewView');
-      const vLogs = document.getElementById('logsView');
-      const vTrash = document.getElementById('trashView');
-      const searchWrapper = document.getElementById('searchWrapper');
-
-      [tOverview, tLogs, tTrash].forEach(el => {
-        el.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-slate-900';
-      });
-      [vOverview, vLogs, vTrash].forEach(el => el.classList.add('hidden'));
-
-      if (tab === 'overview') {
-        tOverview.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-xs';
-        vOverview.classList.remove('hidden');
-        searchWrapper.classList.remove('hidden');
-      } else if (tab === 'logs') {
-        tLogs.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-xs';
-        vLogs.classList.remove('hidden');
-        searchWrapper.classList.remove('hidden');
-      } else {
-        tTrash.className = 'px-4 py-1.5 rounded-lg text-xs font-bold bg-white text-rose-600 shadow-xs flex items-center gap-1.5';
-        vTrash.classList.remove('hidden');
-        searchWrapper.classList.add('hidden');
-      }
-      renderLists();
-    }
-
-    function tickActiveTimers() {
-      if (!activeTimers.length) return;
-      const now = Date.now();
-      activeTimers.forEach(item => {
-        const el = document.getElementById(`timerDisplay_${item.id}`);
-        if (el) el.innerText = formatTimerDisplay(now - item.startTimestamp);
-      });
-    }
-
-    function stopTimer(id) {
-      const idx = activeTimers.findIndex(t => t.id === id);
-      if (idx === -1) return;
-      const timer = activeTimers[idx];
-      const now = Date.now();
-      const finishTime = getTimeString();
-      const durationMs = Math.max(0, now - timer.startTimestamp);
-
-      sessions.unshift({
-        id: 'sess_' + Date.now(),
-        project: timer.project,
-        round: timer.round || 'Round 1',
-        date: timer.date,
-        startTime: timer.startTime,
-        finishTime,
-        durationMs
-      });
-      activeTimers.splice(idx, 1);
-      saveState();
-    }
-
-    function moveToTrash(id) {
-      const session = sessions.find(s => s.id === id);
-      if (!session) return;
-      if (confirm(`Move "${session.project}" session to Trash? (Will be kept for 30 days)`)) {
-        sessions = sessions.filter(s => s.id !== id);
-        trash.unshift({ ...session, deletedAt: Date.now() });
-        saveState();
-      }
-    }
-
-    function restoreFromTrash(id) {
-      const item = trash.find(t => t.id === id);
-      if (!item) return;
-      trash = trash.filter(t => t.id !== id);
-      const restored = { ...item };
-      delete restored.deletedAt;
-      sessions.unshift(restored);
-      saveState();
-    }
-
-    function deletePermanently(id) {
-      if (confirm('Permanently delete this session record? This action cannot be reversed.')) {
-        trash = trash.filter(t => t.id !== id);
-        saveState();
-      }
-    }
-
-    function openEditModal(id) {
-      const s = sessions.find(item => item.id === id);
-      if (!s) return;
-      document.getElementById('editSessionId').value = s.id;
-      document.getElementById('editProjectInput').value = s.project;
-      document.getElementById('editRoundSelect').value = s.round || 'Round 1';
-      document.getElementById('editDateInput').value = s.date;
-      document.getElementById('editStartInput').value = s.startTime;
-      document.getElementById('editEndInput').value = s.finishTime;
-      document.getElementById('editModal').classList.remove('hidden');
-    }
-
-    function toggleProjectHistory(projectName) {
-      if (expandedProjects.has(projectName)) {
-        expandedProjects.delete(projectName);
-      } else {
-        expandedProjects.add(projectName);
-      }
-      renderLists();
-    }
-
-    function renderMetrics() {
-      const totalMs = sessions.reduce((acc, s) => acc + s.durationMs, 0);
-      const distinctProjects = new Set([...sessions.map(s => s.project), ...activeTimers.map(t => t.project)]).size;
-
-      document.getElementById('statActiveTimers').innerText = activeTimers.length;
-      document.getElementById('statTotalProjects').innerText = distinctProjects;
-      document.getElementById('statTotalEarnings').innerText = calculateEarnings(totalMs);
-
-      // Hourly Rate Badge Toggle ($90/hr or •••)
-      const rateBadge = document.getElementById('statHourlyRateBadge');
-      if (rateBadge) {
-        rateBadge.innerText = showEarnings ? '$90/hr' : '•••';
-      }
-
-      // Chronological logs table header
-      const thHeader = document.getElementById('thEarningsHeader');
-      if (thHeader) {
-        thHeader.innerText = showEarnings ? 'Earned ($90/h)' : 'Earned';
-      }
-
-      // Update eye icon state
-      const eyeIcon = document.getElementById('earningsEyeIcon');
-      if (eyeIcon) {
-        eyeIcon.setAttribute('data-lucide', showEarnings ? 'eye' : 'eye-off');
-      }
-
-      const trashBadge = document.getElementById('trashBadge');
-      if (trash.length > 0) {
-        trashBadge.innerText = trash.length;
-        trashBadge.classList.remove('hidden');
-      } else {
-        trashBadge.classList.add('hidden');
-      }
-    }
-
-    function renderActiveTimers() {
-      const container = document.getElementById('activeTimersContainer');
-      const list = document.getElementById('activeTimersList');
-      if (!activeTimers.length) {
-        container.classList.add('hidden');
-        list.innerHTML = '';
-        return;
-      }
-      container.classList.remove('hidden');
-      list.innerHTML = activeTimers.map(t => `
-        <div class="bg-indigo-900 text-white p-5 rounded-2xl shadow-lg border border-indigo-700/50 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs uppercase font-bold text-indigo-300">Live Session</span>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-800 text-indigo-200 font-semibold">${t.round || 'Round 1'}</span>
-            </div>
-            <h4 class="text-lg font-bold mt-1 truncate">${t.project}</h4>
-            <div class="text-xs text-indigo-200 mt-1">Started at ${t.startTime} (${t.date})</div>
-          </div>
-          <div class="mt-6 flex items-baseline justify-between pt-4 border-t border-indigo-800">
-            <span id="timerDisplay_${t.id}" class="text-2xl font-extrabold mono">${formatTimerDisplay(Date.now() - t.startTimestamp)}</span>
-            <button onclick="stopTimer('${t.id}')" class="px-4 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-all shadow-md">END</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderLists() {
-      const q = searchQuery.toLowerCase();
-      const filteredSessions = sessions.filter(s => 
-        s.project.toLowerCase().includes(q) || 
-        (s.round && s.round.toLowerCase().includes(q))
-      );
-      const tbody = document.getElementById('logsTableBody');
-      const emptyLogs = document.getElementById('emptyLogs');
-
-      if (!filteredSessions.length) {
-        tbody.innerHTML = '';
-        emptyLogs.classList.remove('hidden');
-      } else {
-        emptyLogs.classList.add('hidden');
-        tbody.innerHTML = filteredSessions.map(s => `
-          <tr class="hover:bg-slate-50/80 transition-colors">
-            <td class="px-6 py-4 font-semibold text-slate-800">${s.project}</td>
-            <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700">${s.round || 'Round 1'}</span></td>
-            <td class="px-6 py-4 text-slate-500">${s.date}</td>
-            <td class="px-6 py-4 mono text-slate-500">${s.startTime}</td>
-            <td class="px-6 py-4 mono text-slate-500">${s.finishTime}</td>
-            <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 mono">${formatDuration(s.durationMs)}</span></td>
-            <td class="px-6 py-4 font-bold text-emerald-600 mono">${calculateEarnings(s.durationMs)}</td>
-            <td class="px-6 py-4 text-right space-x-2">
-              <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-              <button onclick="moveToTrash('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600" title="Move to Trash"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </td>
-          </tr>
-        `).join('');
-      }
-
-      const projectsGrid = document.getElementById('projectsGrid');
-      const emptyOverview = document.getElementById('emptyOverview');
-      const grouped = {};
-
-      sessions.forEach(s => {
-        if (!grouped[s.project]) grouped[s.project] = { totalMs: 0, sessions: [] };
-        grouped[s.project].totalMs += s.durationMs;
-        grouped[s.project].sessions.push(s);
-      });
-
-      const projectNames = Object.keys(grouped).filter(name => name.toLowerCase().includes(q));
-
-      if (!projectNames.length) {
-        projectsGrid.innerHTML = '';
-        emptyOverview.classList.remove('hidden');
-      } else {
-        emptyOverview.classList.add('hidden');
-        projectsGrid.innerHTML = projectNames.map(name => {
-          const p = grouped[name];
-          const latestRound = p.sessions[0]?.round || 'Round 1';
-          const isExpanded = expandedProjects.has(name);
-
-          const historyHtml = isExpanded ? `
-            <div class="mt-4 pt-4 border-t border-slate-100 space-y-2">
-              <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Tracked History</p>
-              <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-                ${p.sessions.map(s => `
-                  <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                    <div class="space-y-0.5">
-                      <div class="flex items-center gap-1.5">
-                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-indigo-700 border border-slate-200">${s.round || 'Round 1'}</span>
-                        <span class="text-slate-600 text-[11px] font-medium">${s.date}</span>
-                      </div>
-                      <div class="text-[11px] text-slate-400 mono">${s.startTime} -${s.finishTime}</div>
-                    </div>
-                    <div class="text-right flex items-center gap-2">
-                      <div>
-                        <div class="font-bold text-slate-800 mono">${formatDuration(s.durationMs)}</div>
-                        <div class="text-[10px] font-semibold text-emerald-600 mono">${calculateEarnings(s.durationMs)}</div>
-                      </div>
-                      <div class="flex items-center pl-1 border-l border-slate-200">
-                        <button onclick="openEditModal('${s.id}')" class="p-1 text-slate-400 hover:text-indigo-600" title="Edit"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                        <button onclick="moveToTrash('${s.id}')" class="p-1 text-slate-400 hover:text-rose-600" title="Move to Trash"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                      </div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : '';
-
-          return `
-            <div class="p-5 rounded-2xl border border-slate-200 bg-white hover:border-indigo-200 transition-all flex flex-col justify-between shadow-xs">
-              <div>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">${p.sessions.length} sessions</span>
-                  <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">Latest: ${latestRound}</span>
-                </div>
-                <h3 class="text-base font-bold text-slate-900 mt-1 truncate">${name}</h3>
-                <div class="flex items-baseline justify-between mt-3">
-                  <p class="text-xl font-extrabold text-indigo-600 mono">${formatDuration(p.totalMs)}</p>
-                  <p class="text-sm font-bold text-emerald-600 mono">${calculateEarnings(p.totalMs)}</p>
-                </div>
-              </div>
-
-              ${historyHtml}
-
-              <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <button onclick="toggleProjectHistory('${name.replace(/'/g, "\\'")}')" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
-                  <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-3.5 h-3.5"></i>
-                  ${isExpanded ? 'Hide History' : `View History (${p.sessions.length})`}
-                </button>
-                <button onclick="startQuickTimer('${name.replace(/'/g, "\\'")}')" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-                  <i data-lucide="play" class="w-3.5 h-3.5 fill-indigo-600"></i> Track Again
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // Render Trash Table
-      const trashBody = document.getElementById('trashTableBody');
-      const emptyTrash = document.getElementById('emptyTrash');
-      if (!trash.length) {
-        trashBody.innerHTML = '';
-        emptyTrash.classList.remove('hidden');
-      } else {
-        emptyTrash.classList.add('hidden');
-        const now = Date.now();
-        trashBody.innerHTML = trash.map(t => {
-          const daysPassed = Math.floor((now - t.deletedAt) / (24 * 60 * 60 * 1000));
-          const daysLeft = Math.max(0, RETENTION_DAYS - daysPassed);
-          return `
-            <tr class="hover:bg-slate-50/80 transition-colors">
-              <td class="px-6 py-4 font-semibold text-slate-800">${t.project}</td>
-              <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700">${t.round || 'Round 1'}</span></td>
-              <td class="px-6 py-4 text-slate-500">${t.date} (${t.startTime} - ${t.finishTime})</td>
-              <td class="px-6 py-4 font-medium mono text-slate-700">${formatDuration(t.durationMs)}</td>
-              <td class="px-6 py-4"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${daysLeft <= 5 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">${daysLeft}d left</span></td>
-              <td class="px-6 py-4 text-right space-x-2">
-                <button onclick="restoreFromTrash('${t.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg transition-colors inline-flex items-center gap-1">
-                  <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Restore
-                </button>
-                <button onclick="deletePermanently('${t.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-lg transition-colors inline-flex items-center gap-1">
-                  <i data-lucide="trash" class="w-3 h-3"></i> Delete Forever
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      lucide.createIcons();
-    }
-
-    function startQuickTimer(name) {
-      const prevSessions = sessions.filter(s => s.project === name);
-      let nextRound = 'Round 1';
-      if (prevSessions.length > 0) {
-        const lastRound = prevSessions[0].round || 'Round 1';
-        const roundNum = parseInt(lastRound.replace('Round ', ''), 10) || 1;
-        nextRound = roundNum < 5 ? `Round ${roundNum + 1}` : 'Round 5';
-      }
-
-      activeTimers.push({
-        id: 'act_' + Date.now(),
-        project: name,
-        round: nextRound,
-        date: getTodayString(),
-        startTime: getTimeString(),
-        startTimestamp: Date.now()
-      });
-      saveState();
-    }
-
-    function exportCsv() {
-      if (!sessions.length) { alert('No sessions to export.'); return; }
-      let csv = 'Project,Round,Date,Start Time,Finish Time,Duration (Formatted),Duration (ms),Rate ($/hr),Earned ($)\n';
-      sessions.forEach(s => {
-        const earned = ((s.durationMs / 3600000) * HOURLY_RATE).toFixed(2);
-        csv += `"${s.project}","${s.round || 'Round 1'}","${s.date}","${s.startTime}","${s.finishTime}","${formatDuration(s.durationMs)}",${s.durationMs},${HOURLY_RATE},"${earned}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Work_Time_Logs_${getTodayString()}.csv`;
-      a.click();
-    }
-
-    function render() {
-      renderMetrics();
-      renderActiveTimers();
-      renderLists();
-    }
-
-    window.onload = init;
-  </script>
-</body>
-</html>
+      document.getElementById('searchInput').oninput = (e) => { searchQuery = e.target.value.toLowerCase(); renderLists
